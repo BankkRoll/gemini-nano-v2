@@ -11,9 +11,9 @@ export const metadata: Metadata = {
     "Nano Studio 98 - Chrome Built-in AI Chat (Gemini Nano) - Local, Private, Fast",
   description:
     "Windows 98-style Chrome Built-in AI Chat powered by Gemini Nano. Local, private, and fast AI conversations with built-in tools for chat, summarize, translate, detect, write, rewrite, and proofread. No external APIs required - runs entirely in your browser.",
-  metadataBase: new URL("https://gemini-nano.vercel.app"),
+  metadataBase: new URL("https://nano-studio.vercel.app"),
   alternates: {
-    canonical: "https://gemini-nano.vercel.app",
+    canonical: "https://nano-studio.vercel.app",
   },
   keywords: [
     "Chrome Built-in AI",
@@ -55,7 +55,7 @@ export const metadata: Metadata = {
     title: "Nano Studio 98 - Chrome Built-in AI Chat",
     description:
       "Windows 98-style Chrome Built-in AI Chat powered by Gemini Nano. Local, private, and fast.",
-    url: "https://gemini-nano.vercel.app",
+    url: "https://nano-studio.vercel.app",
     type: "website",
     locale: "en_US",
     siteName: "Nano Studio 98",
