@@ -9,13 +9,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useAppStore } from "@/store/app-store";
 import { Languages } from "lucide-react";
 import { memo } from "react";
-
-type Props = {
-  value: string;
-  onChange: (v: string) => void;
-};
 
 const LANGS = [
   { value: "en", label: "English" },
@@ -67,13 +63,19 @@ const LANGS = [
   { value: "yi", label: "Yiddish" },
 ];
 
-function TranslateSelectBase({ value, onChange }: Props) {
-  const selectedLanguage = LANGS.find((lang) => lang.value === value);
+function TranslateSelectBase() {
+  const targetLang = useAppStore((s) => s.settings.targetLang);
+  const updateSettings = useAppStore((s) => s.updateSettings);
+  const selectedLanguage = LANGS.find((lang) => lang.value === targetLang);
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button size="sm" variant="secondary" className="h-7 gap-2 px-2">
+        <Button
+          size="sm"
+          variant="secondary"
+          className="h-7 gap-2 px-2 border shadow-sm"
+        >
           <Languages className="h-3.5 w-3.5" />
           <span className="max-sm:hidden">
             {selectedLanguage?.label || "Language"}
@@ -87,7 +89,7 @@ function TranslateSelectBase({ value, onChange }: Props) {
           {LANGS.map((lang) => (
             <DropdownMenuItem
               key={lang.value}
-              onClick={() => onChange(lang.value)}
+              onClick={() => updateSettings({ targetLang: lang.value })}
             >
               {lang.label}
             </DropdownMenuItem>

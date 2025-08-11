@@ -28,7 +28,7 @@
 - **Private** - No servers, no API keys, all local
 - **Modern UI** - Clean interface with smooth animations
 
-## Quick Start
+## Quick start
 
 ```bash
 # Clone
@@ -41,29 +41,73 @@ pnpm install
 # Dev
 pnpm dev
 
-# Build
+# Build + start
 pnpm build
 pnpm start
 ```
 
-## Project Structure
+## Project structure
 
 ```
 src/
-├── app/                    # Next.js app router
-│   ├── globals.css        # Tailwind v4 + styles
-│   ├── layout.tsx         # Root layout
-│   └── page.tsx           # Main app
-├── components/             # UI components
-│   ├── chat/              # Chat interface
-│   ├── markdown-renderer/ # Markdown parsing
-│   ├── prompt-dock/       # Input panel
-│   ├── settings-dialog/   # Settings modal
-│   ├── sidebar/           # Conversation list
-│   └── ui/                # Reusable UI primitives
-├── hooks/                  # Custom hooks
-├── lib/                    # Storage, config, utils
-└── types/                  # TypeScript types
+├─ app/
+│  ├─ globals.css
+│  ├─ layout.tsx
+│  └─ page.tsx
+├─ components/
+│  ├─ chat/
+│  │  ├─ auto-scroll-area.tsx
+│  │  ├─ chat-feed.tsx
+│  │  ├─ message-item.tsx
+│  │  ├─ message-list.tsx
+│  │  ├─ status-badge.tsx
+│  │  ├─ thinking-animation.tsx
+│  │  └─ welcome-text.tsx
+│  ├─ markdown-renderer/
+│  │  ├─ code-block.tsx
+│  │  ├─ components.tsx
+│  │  └─ index.tsx
+│  ├─ prompt-dock/
+│  │  ├─ index.tsx
+│  │  ├─ model-select.tsx
+│  │  ├─ send-controls.tsx
+│  │  ├─ tool-select.tsx
+│  │  └─ translate-select.tsx
+│  ├─ settings-dialog/
+│  │  ├─ index.tsx
+│  │  ├─ language-select.tsx
+│  │  ├─ stream-control.tsx
+│  │  ├─ temperature-control.tsx
+│  │  └─ topk-control.tsx
+│  ├─ sidebar/
+│  │  ├─ conversation-item.tsx
+│  │  ├─ index.tsx
+│  │  ├─ model-info-dialog.tsx
+│  │  ├─ status-badge.tsx
+│  │  └─ status-rows.tsx
+│  ├─ signin/
+│  │  ├─ boot-loader.tsx
+│  │  ├─ welcome.tsx
+│  │  └─ windows-loading.tsx
+│  ├─ download-required-dialog.tsx
+│  ├─ logo.tsx
+│  ├─ theme-provider.tsx
+│  └─ ui/  # Shadcn/Radix-based primitives
+│     ├─ accordion.tsx … separator.tsx … sidebar.tsx … dialog.tsx … (and more)
+├─ hooks/
+│  ├─ use-auto-scroll.ts
+│  └─ use-mobile.ts
+├─ lib/
+│  ├─ config.ts
+│  ├─ session.ts
+│  ├─ storage.ts
+│  └─ utils.ts
+├─ providers/
+│  └─ app-providers.tsx
+├─ store/
+│  └─ app-store.ts
+└─ types/
+   └─ index.ts
 ```
 
 ## Development
@@ -95,10 +139,10 @@ pnpm format       # Format code
 ## Data Storage
 
 ```typescript
-// localStorage (persistent)
-nano: settings; // App settings
-nano: conversations; // Chat history
-nano: active; // Active conversation
+// localStorage (persistent, per user — keys are scoped to user id)
+"nano:{userId}:settings"       // App settings
+"nano:{userId}:conversations"  // Chat history
+"nano:{userId}:active"         // Active conversation id
 
 // sessionStorage (temporary)
 nano: session; // User session

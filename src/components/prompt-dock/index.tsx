@@ -1,122 +1,51 @@
 "use client";
 
-import { StatusDot } from "@/components/chat/status-badge";
-import {
-  ModelSelect,
-  type ModelOption as ModelSelectOption,
-} from "@/components/prompt-dock/model-select";
+import { ModelSelect } from "@/components/prompt-dock/model-select";
 import { SendControls } from "@/components/prompt-dock/send-controls";
 import { ToolSelect } from "@/components/prompt-dock/tool-select";
 import { TranslateSelect } from "@/components/prompt-dock/translate-select";
+import { StatusDot } from "@/components/sidebar/status-badge";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import type { Availability, ModelId, Tool } from "@/types";
+import { useAppStore } from "@/store/app-store";
+import type { Availability, Tool } from "@/types";
 import { ArrowUp, GripVertical, Pencil, Settings, Trash2 } from "lucide-react";
 import { motion } from "motion/react";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 
-type ModelOption = { id: ModelId; label: string; capabilities: Tool[] };
-
-const MODEL_OPTIONS: ModelOption[] = [
-  {
-    id: "auto",
-    label: "Gemini Nano · Auto",
-    capabilities: [
-      "chat",
-      "summarize",
-      "translate",
-      "detect",
-      "write",
-      "rewrite",
-      "proofread",
-    ],
-  },
-  {
-    id: "text",
-    label: "Gemini Nano · text",
-    capabilities: [
-      "chat",
-      "summarize",
-      "translate",
-      "detect",
-      "write",
-      "rewrite",
-      "proofread",
-    ],
-  },
-  { id: "generic", label: "Gemini Nano · generic", capabilities: ["chat"] },
-];
-
-const TOOL_OPTIONS: { id: Tool; label: string }[] = [
-  { id: "chat", label: "Chat" },
-  { id: "summarize", label: "Summarizer" },
-  { id: "translate", label: "Translator" },
-  { id: "detect", label: "Language Detector" },
-  { id: "write", label: "Writer" },
-  { id: "rewrite", label: "Rewriter" },
-  { id: "proofread", label: "Proofreader" },
-];
-
-type Props = {
-  value?: string;
-  setValue?: (v: string) => void;
-  tool: Tool;
-  setTool: (t: Tool) => void;
-  model: ModelId;
-  setModel: (m: ModelId) => void;
-  targetLang: string;
-  setTargetLang: (v: string) => void;
-  onSend: (text: string) => void;
-  onStop: () => void;
-  busy?: boolean;
-  thinking?: boolean;
-  onOpenSettings: () => void;
-  promptStatus: Availability;
-  summarizerStatus?: Availability;
-  translatorStatus?: Availability;
-  detectorStatus?: Availability;
-  writerStatus?: Availability;
-  rewriterStatus?: Availability;
-  proofreaderStatus?: Availability;
-  mode: "center" | "bottom";
-};
+type Props = { mode: "center" | "bottom" };
 
 export const PromptDock = React.memo(function PromptDock({
-  value,
-  setValue,
-  tool = "chat",
-  setTool = () => {},
-  model = "auto",
-  setModel = () => {},
-  targetLang = "en",
-  setTargetLang = () => {},
-  onSend,
-  onStop = () => {},
-  busy = false,
-  thinking = false,
-  onOpenSettings = () => {},
-  promptStatus = "unavailable",
-  summarizerStatus = "unavailable",
-  translatorStatus = "unavailable",
-  detectorStatus = "unavailable",
-  writerStatus = "unavailable",
-  rewriterStatus = "unavailable",
-  proofreaderStatus = "unavailable",
   mode = "bottom",
 }: Props) {
-  const [internalValue, setInternalValue] = useState<string>(value ?? "");
-  const isControlled =
-    typeof value === "string" && typeof setValue === "function";
-  const inputValue = isControlled ? (value as string) : internalValue;
-  const updateValue = isControlled
-    ? (setValue as (v: string) => void)
-    : setInternalValue;
+  const [internalValue, setInternalValue] = useState<string>("");
+  const inputValue = internalValue;
+  const updateValue = setInternalValue;
   type QueuedItem = { id: string; text: string };
   const [queuedItems, setQueuedItems] = useState<QueuedItem[]>([]);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
-  const prevBusyRef = useRef<boolean>(busy);
+  const prevBusyRef = useRef<boolean>(false);
   const dragIdRef = useRef<string | null>(null);
   const forceSendTargetRef = useRef<string | null>(null);
+  const conversations = useAppStore((s) => s.conversations);
+  const activeId = useAppStore((s) => s.activeId);
+  const settings = useAppStore((s) => s.settings);
+  const updateSettings = useAppStore((s) => s.updateSettings);
+  const busy = useAppStore((s) => s.busy);
+  const thinking = useAppStore((s) => s.busy);
+  const send = useAppStore((s) => s.send);
+  const stop = useAppStore((s) => s.stop);
+  const promptStatus = useAppStore((s) => s.promptStatus);
+  const summarizerStatus = useAppStore((s) => s.summarizerStatus);
+  const translatorStatus = useAppStore((s) => s.translatorStatus);
+  const detectorStatus = useAppStore((s) => s.detectorStatus);
+  const writerStatus = useAppStore((s) => s.writerStatus);
+  const rewriterStatus = useAppStore((s) => s.rewriterStatus);
+  const proofreaderStatus = useAppStore((s) => s.proofreaderStatus);
+  const current = useMemo(
+    () => conversations.find((c) => c.id === activeId) || null,
+    [conversations, activeId],
+  );
 
   const handleSend = () => {
     const text = (inputValue ?? "").trim();
@@ -126,14 +55,19 @@ export const PromptDock = React.memo(function PromptDock({
       updateValue("");
       return;
     }
-    onSend(text);
-    if (!isControlled) setInternalValue("");
+    send(text);
+    setInternalValue("");
   };
-  const currentModel = useMemo(
-    () => MODEL_OPTIONS.find((m) => m.id === model) ?? MODEL_OPTIONS[0],
-    [model],
-  ) as ModelSelectOption;
-  const allowedTools = currentModel.capabilities;
+  const currentModel = current?.model ?? "auto";
+  const allowedTools = [
+    "chat",
+    "summarize",
+    "translate",
+    "detect",
+    "write",
+    "rewrite",
+    "proofread",
+  ] as const;
   const statusForTool = (t: Tool): Availability => {
     switch (t) {
       case "chat":
@@ -166,7 +100,7 @@ export const PromptDock = React.memo(function PromptDock({
         if (idx !== -1) {
           const item = queuedItems[idx];
           setQueuedItems((prev) => prev.filter((q) => q.id !== forcedId));
-          onSend(item.text);
+          send(item.text);
           forceSendTargetRef.current = null;
           prevBusyRef.current = busy;
           return;
@@ -176,11 +110,11 @@ export const PromptDock = React.memo(function PromptDock({
       if (queuedItems.length > 0) {
         const next = queuedItems[0];
         setQueuedItems((prev) => prev.slice(1));
-        onSend(next.text);
+        send(next.text);
       }
     }
     prevBusyRef.current = busy;
-  }, [busy, queuedItems, onSend]);
+  }, [busy, queuedItems, send]);
 
   const handleEditQueued = (id: string) => {
     const item = queuedItems.find((q) => q.id === id);
@@ -210,12 +144,12 @@ export const PromptDock = React.memo(function PromptDock({
     if (!busy) {
       const toSend = queuedItems[index];
       setQueuedItems((prev) => prev.filter((q) => q.id !== id));
-      onSend(toSend.text);
+      send(toSend.text);
       return;
     }
     forceSendTargetRef.current = id;
     try {
-      onStop();
+      stop();
     } catch {
       // Ignore AbortError or any sync errors from stop
     }
@@ -260,14 +194,18 @@ export const PromptDock = React.memo(function PromptDock({
 
   const Panel = (
     <div className="dock-measure relative pointer-events-auto border-2 border-black bg-card shadow-lg">
-      <div className="flex items-center justify-between gap-2 px-4 pt-3 text-xs text-muted-foreground">
+      <div className="flex items-center justify-between gap-2 px-4 pt-3 text-xs text-foreground">
         <div className="flex items-center gap-2">
           <StatusDot status={promptStatus} />
           <span className="hidden sm:inline">Built‑in AI</span>
-          <span className="uppercase">{tool}</span>
+          <span className="uppercase">{current?.tool ?? "chat"}</span>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="sm" onClick={onOpenSettings}>
+          <Button
+            className="border-2 border-foreground shadow-sm bg-input text-foreground hover:bg-muted"
+            size="sm"
+            onClick={() => useAppStore.getState().setShowSettings(true)}
+          >
             <Settings className="mr-2 h-3.5 w-3.5" /> Settings
           </Button>
         </div>
@@ -276,25 +214,16 @@ export const PromptDock = React.memo(function PromptDock({
       <div className="relative px-4 pb-4 pt-2">
         <div className="pointer-events-none absolute bottom-6 left-6 flex flex-wrap items-center gap-2">
           <div className="pointer-events-auto">
-            <ModelSelect
-              current={currentModel}
-              options={MODEL_OPTIONS as any}
-              onChange={setModel}
-            />
+            <ModelSelect />
           </div>
 
           <div className="pointer-events-auto">
-            <ToolSelect
-              current={tool}
-              options={TOOL_OPTIONS}
-              disabledByModel={disabledByModel}
-              onChange={setTool}
-            />
+            <ToolSelect />
           </div>
 
-          {tool === "translate" && (
+          {(current?.tool ?? "chat") === "translate" && (
             <div className="pointer-events-auto">
-              <TranslateSelect value={targetLang} onChange={setTargetLang} />
+              <TranslateSelect />
             </div>
           )}
         </div>
@@ -304,23 +233,23 @@ export const PromptDock = React.memo(function PromptDock({
           value={inputValue}
           onChange={(e) => updateValue(e.target.value)}
           placeholder={
-            tool === "chat"
+            (current?.tool ?? "chat") === "chat"
               ? "Ask Nano to help…"
-              : tool === "summarize"
+              : (current?.tool ?? "chat") === "summarize"
                 ? "Paste text to summarize…"
-                : tool === "translate"
+                : (current?.tool ?? "chat") === "translate"
                   ? "Text to translate…"
-                  : tool === "detect"
+                  : (current?.tool ?? "chat") === "detect"
                     ? "Text to detect language…"
-                    : tool === "write"
+                    : (current?.tool ?? "chat") === "write"
                       ? "Describe what to write…"
-                      : tool === "rewrite"
+                      : (current?.tool ?? "chat") === "rewrite"
                         ? "Paste text to rewrite…"
                         : "Paste text to proofread…"
           }
           rows={4}
           maxLength={1000}
-          className="resize-none max-h-40 overflow-y-auto"
+          className="resize-none max-h-40 overflow-y-auto text-foreground placeholder:text-foreground/60"
           onKeyDown={(e) => {
             if (e.key === "Enter" && !e.shiftKey) {
               e.preventDefault();
@@ -332,7 +261,7 @@ export const PromptDock = React.memo(function PromptDock({
         <SendControls
           busy={busy}
           onSend={handleSend}
-          onStop={onStop}
+          onStop={() => stop()}
           canQueue={busy && Boolean((inputValue ?? "").trim())}
           onQueueNext={handleQueueNext}
         />
@@ -351,7 +280,7 @@ export const PromptDock = React.memo(function PromptDock({
         {queuedItems.length > 0 && (
           <div className="mb-2 border-2 border-black bg-card px-2 py-2 text-xs shadow-sm">
             <div className="flex items-center justify-between px-1 pb-1">
-              <span className="text-muted-foreground">
+              <span className="text-foreground">
                 Queue ({queuedItems.length})
               </span>
             </div>
@@ -366,7 +295,7 @@ export const PromptDock = React.memo(function PromptDock({
                   onDrop={handleDropAtIndex(idx)}
                 >
                   <div className="min-w-0 flex-1 pr-2 flex items-center gap-2">
-                    <GripVertical className="h-3.5 w-3.5 text-muted-foreground" />
+                    <GripVertical className="h-3.5 w-3.5 text-foreground" />
                     <span className="truncate font-medium">{q.text}</span>
                   </div>
                   <div className="flex items-center gap-1">
@@ -419,7 +348,7 @@ export const PromptDock = React.memo(function PromptDock({
       {queuedItems.length > 0 && (
         <div className="border-2 border-black border-b-0 bg-card px-2 py-2 text-xs shadow-sm">
           <div className="flex items-center justify-between px-1 pb-1">
-            <span className="text-muted-foreground">
+            <span className="text-foreground">
               Queue ({queuedItems.length})
             </span>
           </div>
@@ -434,7 +363,7 @@ export const PromptDock = React.memo(function PromptDock({
                 onDrop={handleDropAtIndex(idx)}
               >
                 <div className="min-w-0 flex-1 pr-2 flex items-center gap-2">
-                  <GripVertical className="h-3.5 w-3.5 text-muted-foreground" />
+                  <GripVertical className="h-3.5 w-3.5 text-foreground" />
                   <span className="truncate font-medium">{q.text}</span>
                 </div>
                 <div className="flex items-center gap-1">

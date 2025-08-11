@@ -7,11 +7,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
-type Props = {
-  value: string;
-  onChange: (v: string) => void;
-};
+import { useAppStore } from "@/store/app-store";
 
 const LANGUAGE_OPTIONS = [
   { value: "en", label: "English" },
@@ -63,13 +59,15 @@ const LANGUAGE_OPTIONS = [
   { value: "yi", label: "Yiddish" },
 ];
 
-export function LanguageSelect({ value, onChange }: Props) {
+export function LanguageSelect() {
+  const value = useAppStore((s) => s.settings.targetLang);
+  const onChange = useAppStore((s) => s.updateSettings);
   const selectedLanguage = LANGUAGE_OPTIONS.find(
     (lang) => lang.value === value,
   );
 
   return (
-    <Select value={value} onValueChange={onChange}>
+    <Select value={value} onValueChange={(v) => onChange({ targetLang: v })}>
       <SelectTrigger className="h-9 px-3 border-2 border-foreground shadow-sm bg-input text-foreground rounded-md hover:bg-muted/50 transition-colors">
         <SelectValue>
           {selectedLanguage ? (

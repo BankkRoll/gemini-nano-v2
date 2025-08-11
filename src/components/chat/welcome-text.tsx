@@ -1,15 +1,18 @@
 "use client";
 
-import type { ModelId, Tool } from "@/types";
+import { useAppStore } from "@/store/app-store";
+import type { Tool } from "@/types";
 import { motion } from "motion/react";
 import { useEffect, useMemo, useRef } from "react";
 
-interface WelcomeTextProps {
-  tool: Tool;
-  model: ModelId;
-}
-
-export function WelcomeText({ tool, model: _model }: WelcomeTextProps) {
+export function WelcomeText() {
+  const conversations = useAppStore((s) => s.conversations);
+  const activeId = useAppStore((s) => s.activeId);
+  const pendingTool = useAppStore(
+    (s: any) => (s as any).pendingTool,
+  ) as Tool | null;
+  const tool: Tool =
+    conversations.find((c) => c.id === activeId)?.tool ?? pendingTool ?? "chat";
   const words = useMemo<string[]>(() => {
     const map: Record<Tool, string[]> = {
       chat: ["What", "can", "I", "help", "you", "build?"],

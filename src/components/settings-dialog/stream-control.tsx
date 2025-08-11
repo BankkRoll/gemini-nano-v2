@@ -2,13 +2,11 @@
 
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { useAppStore } from "@/store/app-store";
 
-type Props = {
-  checked: boolean;
-  onChange: (v: boolean) => void;
-};
-
-export function StreamControl({ checked, onChange }: Props) {
+export function StreamControl() {
+  const checked = useAppStore((s) => s.settings.stream);
+  const update = useAppStore((s) => s.updateSettings);
   return (
     <div className="flex items-center justify-between p-3 border-2 border-foreground bg-muted">
       <div className="space-y-0.5">
@@ -19,7 +17,11 @@ export function StreamControl({ checked, onChange }: Props) {
           Show AI responses as they're generated in real-time.
         </p>
       </div>
-      <Switch id="streaming" checked={checked} onCheckedChange={onChange} />
+      <Switch
+        id="streaming"
+        checked={checked}
+        onCheckedChange={(v) => update({ stream: v })}
+      />
     </div>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { StatusPill } from "@/components/chat/status-badge";
+import { StatusPill } from "@/components/sidebar/status-badge";
 import { cn } from "@/lib/utils";
 import type { Availability } from "@/types";
 import { Info } from "lucide-react";
@@ -30,7 +30,7 @@ export function StatusRows({
         <div key={r.key} className="flex items-center justify-between gap-2">
           <button
             type="button"
-            className="inline-flex items-center gap-1 text-foreground hover:underline"
+            className="cursor-pointer inline-flex items-center gap-1 text-foreground hover:underline"
             onClick={() => onClickInfo?.(r.key)}
           >
             <Info className="h-3.5 w-3.5" /> {r.label}

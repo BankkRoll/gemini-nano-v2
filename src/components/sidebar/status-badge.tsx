@@ -37,8 +37,9 @@ export function StatusPill({
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded-full px-2 py-0.5 text-[10px]",
+        "cursor-default inline-flex items-center rounded-full px-2 py-0.5 text-[10px]",
         map[status],
+        status === "downloadable" && "cursor-pointer",
       )}
     >
       {customLabel || label[status]}

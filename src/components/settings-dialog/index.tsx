@@ -13,43 +13,24 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import type { ModelId, Tool } from "@/types";
+import { useAppStore } from "@/store/app-store";
+import { useMemo } from "react";
 
-type Props = {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  systemPrompt: string;
-  setSystemPrompt: (prompt: string) => void;
-  temperature: number;
-  setTemperature: (temp: number) => void;
-  topK: number;
-  setTopK: (topk: number) => void;
-  stream: boolean;
-  setStream: (stream: boolean) => void;
-  targetLang: string;
-  setTargetLang: (lang: string) => void;
-  currentModel: ModelId;
-  currentTool: Tool;
-};
-
-export function SettingsDialog({
-  open,
-  onOpenChange,
-  systemPrompt,
-  setSystemPrompt,
-  temperature,
-  setTemperature,
-  topK,
-  setTopK,
-  stream,
-  setStream,
-  targetLang,
-  setTargetLang,
-  currentModel,
-  currentTool,
-}: Props) {
-  const isGeminiModel = currentModel === "auto" || currentModel === "text";
-  const isTranslateTool = currentTool === "translate";
+export function SettingsDialog() {
+  const open = useAppStore((s) => s.showSettings);
+  const onOpenChange = useAppStore((s) => s.setShowSettings);
+  const settings = useAppStore((s) => s.settings);
+  const updateSettings = useAppStore((s) => s.updateSettings);
+  const conversations = useAppStore((s) => s.conversations);
+  const activeId = useAppStore((s) => s.activeId);
+  const current = useMemo(
+    () => conversations.find((c) => c.id === activeId) || null,
+    [conversations, activeId],
+  );
+  const isGeminiModel =
+    (current?.model ?? "auto") === "auto" ||
+    (current?.model ?? "auto") === "text";
+  const isTranslateTool = (current?.tool ?? "chat") === "translate";
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -72,8 +53,8 @@ export function SettingsDialog({
             <Textarea
               id="system-prompt"
               placeholder="You are a helpful, concise assistant."
-              value={systemPrompt}
-              onChange={(e) => setSystemPrompt(e.target.value)}
+              value={settings.systemPrompt}
+              onChange={(e) => updateSettings({ systemPrompt: e.target.value })}
               className="min-h-[80px] resize-none border-2 border-foreground shadow-sm bg-input text-foreground placeholder:text-muted-foreground"
             />
             <p className="text-xs text-muted-foreground">
@@ -83,19 +64,14 @@ export function SettingsDialog({
 
           {isGeminiModel && (
             <div className="space-y-4">
-              <TemperatureControl
-                value={temperature}
-                onChange={setTemperature}
-              />
-              <TopKControl value={topK} onChange={setTopK} />
+              <TemperatureControl />
+              <TopKControl />
             </div>
           )}
 
-          {isTranslateTool && (
-            <LanguageSelect value={targetLang} onChange={setTargetLang} />
-          )}
+          {isTranslateTool && <LanguageSelect />}
 
-          <StreamControl checked={stream} onChange={setStream} />
+          <StreamControl />
         </div>
       </DialogContent>
     </Dialog>

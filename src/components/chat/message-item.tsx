@@ -1,6 +1,7 @@
 "use client";
 
 import { MarkdownRenderer } from "@/components/markdown-renderer";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import type { ChatMessage } from "@/types";
 import { memo } from "react";
@@ -11,10 +12,17 @@ function MessageItemBase({ m }: { m: ChatMessage }) {
   return (
     <div
       className={cn(
-        "flex w-full",
+        "flex w-full gap-3",
         isAssistant ? "justify-start" : "justify-end",
       )}
     >
+      {isAssistant && (
+        <Avatar className="size-8 flex-shrink-0">
+          <AvatarImage src="/google_deepmind.png" alt="NANO" />
+          <AvatarFallback>N</AvatarFallback>
+        </Avatar>
+      )}
+
       <div
         className={cn(
           "border p-3 rounded-lg w-full sm:max-w-[85%] max-w-full",
@@ -26,17 +34,27 @@ function MessageItemBase({ m }: { m: ChatMessage }) {
         <div
           className={cn(
             "mb-2 text-xs font-medium uppercase tracking-wider",
-            isAssistant
-              ? "text-muted-foreground"
-              : "text-foreground text-right",
+            isAssistant ? "text-foreground" : "text-foreground text-right",
           )}
         >
-          {m.role}
+          {isAssistant ? "NANO" : m.userName || "User"}
         </div>
         <div className="prose prose-sm w-full break-words overflow-hidden">
           <MarkdownRenderer content={m.content} />
         </div>
       </div>
+
+      {!isAssistant && (
+        <Avatar className="size-8 flex-shrink-0">
+          <AvatarImage
+            src={m.userAvatarUrl || "/logo.svg"}
+            alt={m.userName || "User"}
+          />
+          <AvatarFallback>
+            {m.userName?.[0]?.toUpperCase() || "U"}
+          </AvatarFallback>
+        </Avatar>
+      )}
     </div>
   );
 }

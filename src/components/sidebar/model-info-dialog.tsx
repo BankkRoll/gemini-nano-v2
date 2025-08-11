@@ -48,6 +48,14 @@ const TOOL_INFO: Record<
     constraints: string[];
     apiStatus: string;
     docUrl: string;
+    explainerLabel?: string;
+    explainerUrl?: string;
+    webSupportLabel?: string;
+    webSupportUrl?: string;
+    extensionsSupportLabel?: string;
+    extensionsSupportUrl?: string;
+    chromeStatusUrl?: string;
+    intentUrl?: string;
   }
 > = {
   chat: {
@@ -66,7 +74,16 @@ const TOOL_INFO: Record<
       "Web: Origin Trial; Extensions: Stable (Chrome ≥138)",
     ],
     apiStatus: "Chat API — Extensions: Stable; Web: Origin Trial",
-    docUrl: "https://developer.chrome.com/docs/ai/built-in",
+    docUrl: "https://developer.chrome.com/docs/ai/built-in-apis#prompt_api",
+    explainerLabel: "GitHub",
+    explainerUrl: "https://github.com/webmachinelearning/prompt-api",
+    webSupportLabel: "Origin trial",
+    webSupportUrl:
+      "https://developer.chrome.com/origintrials/#/view_trial/2533837740349325313",
+    extensionsSupportLabel: "Chrome 138",
+    chromeStatusUrl: "https://chromestatus.com/feature/5134603979063296",
+    intentUrl:
+      "https://groups.google.com/a/chromium.org/g/blink-dev/c/6uBwiiFohAU/m/WhaKAB9fAAAJ",
   },
   summarize: {
     label: "Summarize",
@@ -84,7 +101,14 @@ const TOOL_INFO: Record<
       "Extensions: Stable; Web: EPP/experimentation",
     ],
     apiStatus: "Summarizer API — Stable (Extensions); EPP (Web)",
-    docUrl: "https://developer.chrome.com/docs/ai/built-in",
+    docUrl: "https://developer.chrome.com/docs/ai/built-in-apis#summarizer_api",
+    explainerLabel: "MDN",
+    explainerUrl: "https://developer.mozilla.org/docs/Web/API/Summarizer/",
+    webSupportLabel: "Chrome 138",
+    extensionsSupportLabel: "Chrome 138",
+    chromeStatusUrl: "https://chromestatus.com/feature/5193953788559360",
+    intentUrl:
+      "https://groups.google.com/a/chromium.org/g/blink-dev/c/cpyB56aHWs4/m/8NTdmGV8AAAJ",
   },
   translate: {
     label: "Translate",
@@ -102,7 +126,15 @@ const TOOL_INFO: Record<
       "Client‑side privacy; no server round‑trip",
     ],
     apiStatus: "Translator API — Stable (Chrome ≥138)",
-    docUrl: "https://developer.chrome.com/docs/ai/built-in",
+    docUrl: "https://developer.chrome.com/docs/ai/built-in-apis#translator_api",
+    explainerLabel: "MDN",
+    explainerUrl:
+      "https://developer.mozilla.org/docs/Web/API/Translator_and_Language_Detector_APIs",
+    webSupportLabel: "Chrome 138",
+    extensionsSupportLabel: "Chrome 138",
+    chromeStatusUrl: "https://chromestatus.com/feature/5172811302961152",
+    intentUrl:
+      "https://groups.google.com/a/chromium.org/g/blink-dev/c/eCE8jIW2auo/m/3vMI6eQqBAAJ",
   },
   detect: {
     label: "Detect",
@@ -115,7 +147,16 @@ const TOOL_INFO: Record<
     ],
     constraints: ["Chrome ≥138, desktop", "Short inputs perform best"],
     apiStatus: "Language Detector API — Stable (Chrome ≥138)",
-    docUrl: "https://developer.chrome.com/docs/ai/built-in",
+    docUrl:
+      "https://developer.chrome.com/docs/ai/built-in-apis#language_detector_api",
+    explainerLabel: "MDN",
+    explainerUrl:
+      "https://developer.mozilla.org/docs/Web/API/Translator_and_Language_Detector_APIs",
+    webSupportLabel: "Chrome 138",
+    extensionsSupportLabel: "Chrome 138",
+    chromeStatusUrl: "https://chromestatus.com/feature/6494349985841152",
+    intentUrl:
+      "https://groups.google.com/a/chromium.org/g/blink-dev/c/sWcHBe9wpbo/m/H8Xp7NXTCQAJ",
   },
   write: {
     label: "Write",
@@ -125,7 +166,20 @@ const TOOL_INFO: Record<
     goodFor: ["Drafting emails", "Brainstorming", "Boilerplate generation"],
     constraints: ["Origin Trial (Web/Extensions)", "Text‑to‑text only"],
     apiStatus: "Writer API — Origin Trial",
-    docUrl: "https://developer.chrome.com/docs/ai/built-in",
+    docUrl:
+      "https://developer.chrome.com/docs/ai/built-in-apis#writer_and_rewriter_apis",
+    explainerLabel: "GitHub",
+    explainerUrl:
+      "https://github.com/explainers-by-googlers/writing-assistance-apis/",
+    webSupportLabel: "Origin trial",
+    webSupportUrl:
+      "https://developer.chrome.com/origintrials/#/view_trial/-8779204523605360639",
+    extensionsSupportLabel: "Origin trial",
+    extensionsSupportUrl:
+      "https://developer.chrome.com/origintrials/#/view_trial/-8779204523605360639",
+    chromeStatusUrl: "https://chromestatus.com/feature/4712595362414592",
+    intentUrl:
+      "https://groups.google.com/a/chromium.org/g/blink-dev/c/LFaidO_GmIU/m/fwGOKFYPDwAJ",
   },
   rewrite: {
     label: "Rewrite",
@@ -135,7 +189,20 @@ const TOOL_INFO: Record<
     goodFor: ["Polishing drafts", "Tone changes", "Length adjustments"],
     constraints: ["Origin Trial (Web/Extensions)", "Text‑to‑text only"],
     apiStatus: "Rewriter API — Origin Trial",
-    docUrl: "https://developer.chrome.com/docs/ai/built-in",
+    docUrl:
+      "https://developer.chrome.com/docs/ai/built-in-apis#writer_and_rewriter_apis",
+    explainerLabel: "GitHub",
+    explainerUrl:
+      "https://github.com/explainers-by-googlers/writing-assistance-apis/",
+    webSupportLabel: "Origin trial",
+    webSupportUrl:
+      "https://developer.chrome.com/origintrials/#/view_trial/444167513249415169",
+    extensionsSupportLabel: "Origin trial",
+    extensionsSupportUrl:
+      "https://developer.chrome.com/origintrials/#/view_trial/444167513249415169",
+    chromeStatusUrl: "https://chromestatus.com/feature/5112320150470656",
+    intentUrl:
+      "https://groups.google.com/a/chromium.org/g/blink-dev/c/LgPGLOV2vrc/m/1crxL0oPDwAJ",
   },
   proofread: {
     label: "Proofread",
@@ -145,7 +212,17 @@ const TOOL_INFO: Record<
     goodFor: ["Comment editing", "Document fixes", "Chat message cleanup"],
     constraints: ["Chrome 139+ Canary / EPP", "Experimental"],
     apiStatus: "Proofreader API — EPP (Experimental)",
-    docUrl: "https://developer.chrome.com/docs/ai/built-in",
+    docUrl:
+      "https://developer.chrome.com/docs/ai/built-in-apis#proofreader_api",
+    explainerLabel: "GitHub",
+    explainerUrl: "https://github.com/explainers-by-googlers/proofreader-api",
+    webSupportLabel: "Experimental (EPP)",
+    webSupportUrl: "https://developer.chrome.com/docs/ai/join-epp",
+    extensionsSupportLabel: "Experimental (EPP)",
+    extensionsSupportUrl: "https://developer.chrome.com/docs/ai/join-epp",
+    chromeStatusUrl: "https://chromestatus.com/feature/5164677291835392",
+    intentUrl:
+      "https://groups.google.com/a/chromium.org/g/blink-dev/c/1waIrgpXrRs/m/dFySNRrDBgAJ",
   },
 };
 
@@ -178,6 +255,10 @@ export function ModelInfoDialog({
   const currentInfo = useMemo(() => TOOL_INFO[current], [current]);
 
   const CurrentIcon = currentInfo.icon;
+
+  React.useEffect(() => {
+    if (open) setCurrent(initialTool);
+  }, [initialTool, open]);
 
   return (
     <Dialog
@@ -262,19 +343,91 @@ export function ModelInfoDialog({
                   </ul>
                 </div>
               </div>
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-xs">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
                 <div>
                   <span className="opacity-70">API status:</span>{" "}
                   {currentInfo.apiStatus}
                 </div>
-                <a
-                  href={currentInfo.docUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="underline inline-flex items-center gap-1"
-                >
-                  Learn more <ExternalLink className="h-3 w-3" />
-                </a>
+                <div>
+                  <span className="opacity-70">Docs:</span>{" "}
+                  <a
+                    href={currentInfo.docUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="underline inline-flex items-center gap-1"
+                  >
+                    Learn more <ExternalLink className="h-3 w-3" />
+                  </a>
+                </div>
+                {currentInfo.explainerUrl && (
+                  <div>
+                    <span className="opacity-70">Explainer:</span>{" "}
+                    <a
+                      href={currentInfo.explainerUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="underline"
+                    >
+                      {currentInfo.explainerLabel ?? "Explainer"}
+                    </a>
+                  </div>
+                )}
+                <div>
+                  <span className="opacity-70">Web:</span>{" "}
+                  {currentInfo.webSupportUrl ? (
+                    <a
+                      href={currentInfo.webSupportUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="underline"
+                    >
+                      {currentInfo.webSupportLabel ?? "See details"}
+                    </a>
+                  ) : (
+                    <span>{currentInfo.webSupportLabel ?? "—"}</span>
+                  )}
+                </div>
+                <div>
+                  <span className="opacity-70">Extensions:</span>{" "}
+                  {currentInfo.extensionsSupportUrl ? (
+                    <a
+                      href={currentInfo.extensionsSupportUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="underline"
+                    >
+                      {currentInfo.extensionsSupportLabel ?? "See details"}
+                    </a>
+                  ) : (
+                    <span>{currentInfo.extensionsSupportLabel ?? "—"}</span>
+                  )}
+                </div>
+                {currentInfo.chromeStatusUrl && (
+                  <div>
+                    <span className="opacity-70">Chrome Status:</span>{" "}
+                    <a
+                      href={currentInfo.chromeStatusUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="underline"
+                    >
+                      View
+                    </a>
+                  </div>
+                )}
+                {currentInfo.intentUrl && (
+                  <div>
+                    <span className="opacity-70">Intent:</span>{" "}
+                    <a
+                      href={currentInfo.intentUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="underline"
+                    >
+                      View
+                    </a>
+                  </div>
+                )}
               </div>
             </div>
           </div>

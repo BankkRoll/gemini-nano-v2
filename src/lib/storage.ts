@@ -1,10 +1,12 @@
-import type { ChatMessage, Conversation, ModelId, Tool } from "@/types";
+import type { WindowsUser } from "@/components/signin/welcome";
 import {
   APP_STORAGE_VERSION,
   DEFAULT_SETTINGS,
   STORAGE_KEYS,
   type AppSettings,
-} from "./config";
+} from "@/lib/config";
+import { getSignedInUser } from "@/lib/session";
+import type { ChatMessage, Conversation, ModelId, Tool } from "@/types";
 
 type StoredRoot = {
   v: number;
@@ -97,8 +99,9 @@ function coerceSettings(value: unknown): AppSettings {
 
 function readSettingsRaw(): AppSettings | null {
   if (!isClient()) return null;
+  const key = scopedKey(STORAGE_KEYS.settings);
   const raw = safeParse<{ v: number; settings: AppSettings }>(
-    localStorage.getItem(STORAGE_KEYS.settings),
+    localStorage.getItem(key) ?? localStorage.getItem(STORAGE_KEYS.settings),
   );
   if (!raw) return null;
   if (raw.v !== APP_STORAGE_VERSION) return null;
@@ -111,7 +114,7 @@ export function getSettings(): AppSettings {
   if (existing) return existing;
   try {
     localStorage.setItem(
-      STORAGE_KEYS.settings,
+      scopedKey(STORAGE_KEYS.settings),
       JSON.stringify({ v: APP_STORAGE_VERSION, settings: DEFAULT_SETTINGS }),
     );
   } catch {}
@@ -128,7 +131,7 @@ export function setSettings(
   const normalized = coerceSettings(value);
   try {
     localStorage.setItem(
-      STORAGE_KEYS.settings,
+      scopedKey(STORAGE_KEYS.settings),
       JSON.stringify({ v: APP_STORAGE_VERSION, settings: normalized }),
     );
   } catch {}
@@ -137,8 +140,10 @@ export function setSettings(
 
 export function getConversations(): Conversation[] {
   if (!isClient()) return [];
+  const key = scopedKey(STORAGE_KEYS.conversations);
   const raw = safeParse<{ v: number; conversations: unknown }>(
-    localStorage.getItem(STORAGE_KEYS.conversations),
+    localStorage.getItem(key) ??
+      localStorage.getItem(STORAGE_KEYS.conversations),
   );
   if (
     raw &&
@@ -176,7 +181,7 @@ export function setConversations(conversations: Conversation[]) {
     : [];
   try {
     localStorage.setItem(
-      STORAGE_KEYS.conversations,
+      scopedKey(STORAGE_KEYS.conversations),
       JSON.stringify({ v: APP_STORAGE_VERSION, conversations: filtered }),
     );
   } catch {}
@@ -185,8 +190,9 @@ export function setConversations(conversations: Conversation[]) {
 
 export function getActiveConversationId(): string | null {
   if (!isClient()) return null;
+  const key = scopedKey(STORAGE_KEYS.activeId);
   const raw = safeParse<{ v: number; id: unknown }>(
-    localStorage.getItem(STORAGE_KEYS.activeId),
+    localStorage.getItem(key) ?? localStorage.getItem(STORAGE_KEYS.activeId),
   );
   if (raw && raw.v === APP_STORAGE_VERSION && isString(raw.id)) return raw.id;
   return null;
@@ -196,7 +202,7 @@ export function setActiveConversationId(id: string | null) {
   if (!isClient()) return id;
   try {
     localStorage.setItem(
-      STORAGE_KEYS.activeId,
+      scopedKey(STORAGE_KEYS.activeId),
       JSON.stringify({ v: APP_STORAGE_VERSION, id: id ?? null }),
     );
   } catch {}
@@ -221,13 +227,48 @@ export function onStorageChange(listener: () => void) {
   if (!isClient()) return () => {};
   const handler = (e: StorageEvent) => {
     if (!e.key) return;
-    if (
-      e.key === STORAGE_KEYS.settings ||
-      e.key === STORAGE_KEYS.conversations ||
-      e.key === STORAGE_KEYS.activeId
-    )
-      listener();
+    const suffixes = [
+      STORAGE_KEYS.settings.split(":").slice(-1)[0],
+      STORAGE_KEYS.conversations.split(":").slice(-1)[0],
+      STORAGE_KEYS.activeId.split(":").slice(-1)[0],
+    ];
+    if (suffixes.some((s) => e.key?.endsWith(`:${s}`))) listener();
   };
   window.addEventListener("storage", handler);
   return () => window.removeEventListener("storage", handler);
+}
+
+function scopedKey(base: string): string {
+  const userId = getSignedInUser()?.id || "user";
+  return base.replace(/^nano:/, `nano:${userId}:`);
+}
+
+export function getUsers(): WindowsUser[] {
+  if (!isClient())
+    return [{ id: "user", name: "User", avatarUrl: "/logo.svg" }];
+  const raw = safeParse<{ v: number; users: WindowsUser[] }>(
+    localStorage.getItem("nano:users"),
+  );
+  if (raw && raw.v === APP_STORAGE_VERSION && Array.isArray(raw.users)) {
+    const safe = raw.users.filter(
+      (u) => u && typeof u.id === "string" && typeof u.name === "string",
+    );
+    return safe.length > 0
+      ? safe
+      : [{ id: "user", name: "User", avatarUrl: "/logo.svg" }];
+  }
+  return [{ id: "user", name: "User", avatarUrl: "/logo.svg" }];
+}
+
+export function upsertUser(user: WindowsUser) {
+  if (!isClient()) return;
+  const existing = getUsers();
+  const filtered = existing.filter((u) => u.id !== user.id);
+  const next = [user, ...filtered];
+  try {
+    localStorage.setItem(
+      "nano:users",
+      JSON.stringify({ v: APP_STORAGE_VERSION, users: next }),
+    );
+  } catch {}
 }

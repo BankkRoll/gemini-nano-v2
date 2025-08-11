@@ -1,6 +1,6 @@
 "use client";
 
-import { StatusPill } from "@/components/chat/status-badge";
+import { StatusPill } from "@/components/sidebar/status-badge";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -10,38 +10,22 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import type { Availability } from "@/types";
+import { useAppStore } from "@/store/app-store";
 import { Download, Info, X } from "lucide-react";
 
-type Props = {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  promptStatus: Availability;
-  summarizerStatus: Availability;
-  translatorStatus: Availability;
-  detectorStatus: Availability;
-  writerStatus: Availability;
-  rewriterStatus: Availability;
-  proofreaderStatus: Availability;
-  onDownload: () => void;
-  onRefresh: () => void;
-  downloading: boolean;
-};
-
-export function DownloadRequiredDialog({
-  open,
-  onOpenChange,
-  promptStatus,
-  summarizerStatus,
-  translatorStatus,
-  detectorStatus,
-  writerStatus,
-  rewriterStatus,
-  proofreaderStatus,
-  onDownload,
-  onRefresh,
-  downloading,
-}: Props) {
+export function DownloadRequiredDialog() {
+  const open = useAppStore((s) => s.downloadOpen);
+  const onOpenChange = useAppStore((s) => s.setDownloadOpen);
+  const promptStatus = useAppStore((s) => s.promptStatus);
+  const summarizerStatus = useAppStore((s) => s.summarizerStatus);
+  const translatorStatus = useAppStore((s) => s.translatorStatus);
+  const detectorStatus = useAppStore((s) => s.detectorStatus);
+  const writerStatus = useAppStore((s) => s.writerStatus);
+  const rewriterStatus = useAppStore((s) => s.rewriterStatus);
+  const proofreaderStatus = useAppStore((s) => s.proofreaderStatus);
+  const onDownload = useAppStore((s) => s.handleDownload);
+  const onRefresh = useAppStore((s) => s.handleRefresh);
+  const downloading = useAppStore((s) => s.busy);
   const allUnavailable = [
     promptStatus,
     summarizerStatus,

@@ -10,6 +10,9 @@ export type ChatMessage = {
   id: string;
   role: Role;
   content: string;
+  userId?: string;
+  userName?: string;
+  userAvatarUrl?: string;
 };
 
 export type Tool =

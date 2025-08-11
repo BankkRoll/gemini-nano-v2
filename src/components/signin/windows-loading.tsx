@@ -11,7 +11,7 @@ export type WindowsLoadingBarProps = {
 
 export function WindowsLoadingBar({
   totalBlocks = 50,
-  filledBlocks,
+  filledBlocks = 0,
   className,
   blockClassName,
 }: WindowsLoadingBarProps) {

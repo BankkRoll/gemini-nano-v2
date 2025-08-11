@@ -18,6 +18,7 @@ export const STORAGE_KEYS = {
   conversations: "nano:conversations",
   activeId: "nano:active",
   settings: "nano:settings",
+  users: "nano:users",
 };
 
 export const APP_STORAGE_VERSION = 1 as const;

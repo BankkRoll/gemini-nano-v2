@@ -24,7 +24,7 @@ function SendControlsBase({
       <div />
       <div className="flex items-center gap-2">
         {!busy ? (
-          <Button onClick={onSend}>
+          <Button onClick={onSend} className="border-2 border-card shadow-sm">
             <Send className="mr-2 h-4 w-4" /> Send
           </Button>
         ) : (

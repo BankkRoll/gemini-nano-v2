@@ -1,20 +1,26 @@
 "use client";
 
-import { WindowsLoadingBar } from "@/components/windows-loading";
+import { WindowsLoadingBar } from "@/components/signin/windows-loading";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
+import { useAppStore } from "@/store/app-store";
 import { useEffect, useRef, useState } from "react";
-import Logo from "./logo";
+import Logo from "../logo";
 
 export type WindowsUser = {
   id: string;
   name: string;
   avatarUrl?: string;
-};
-
-type Props = {
-  users?: WindowsUser[];
-  onSignIn: (user: WindowsUser) => void;
-  className?: string;
 };
 
 type Step = "select" | "signing";
@@ -23,7 +29,8 @@ const DEFAULT_USERS: WindowsUser[] = [
   { id: "user", name: "User", avatarUrl: "/logo.svg" },
 ];
 
-export function Welcome({ users = DEFAULT_USERS, onSignIn, className }: Props) {
+export function Welcome() {
+  const [mounted, setMounted] = useState(false);
   const [step, setStep] = useState<Step>("select");
   const [selected, setSelected] = useState<WindowsUser | null>(null);
   const [signingLines, setSigningLines] = useState<string[]>([]);
@@ -32,6 +39,34 @@ export function Welcome({ users = DEFAULT_USERS, onSignIn, className }: Props) {
   const audioCtxRef = useRef<AudioContext | null>(null);
   const startupBufferRef = useRef<AudioBuffer | null>(null);
   const [bootBlocks, setBootBlocks] = useState(0);
+  const [newOpen, setNewOpen] = useState(false);
+  const [newName, setNewName] = useState("");
+  const signIn = useAppStore((s) => s.signIn);
+  const hydrate = useAppStore((s) => s.hydrate);
+  const users = useAppStore((s) => s.users);
+  const refreshUsers = useAppStore((s) => s.refreshUsers);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const handleCreateUser = () => {
+    const name = newName.trim();
+    if (!name) return;
+    const user: WindowsUser = {
+      id:
+        name
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "-")
+          .slice(0, 24) || crypto.randomUUID(),
+      name,
+      avatarUrl: "/logo.svg",
+    };
+    setNewOpen(false);
+    setNewName("");
+    useAppStore.getState().createUser(user as any);
+    refreshUsers();
+  };
 
   async function ensureAudioContext(): Promise<AudioContext> {
     if (!audioCtxRef.current || audioCtxRef.current.state === "closed") {
@@ -72,8 +107,16 @@ export function Welcome({ users = DEFAULT_USERS, onSignIn, className }: Props) {
     }
   }
 
+  const handleUserSelect = (user: WindowsUser) => {
+    void playStartupSound();
+    setSelected(user);
+    setSigningLines([]);
+    setStep("signing");
+  };
+
   useEffect(() => {
     if (step !== "signing" || !selected) return;
+
     const lines = [
       `Signing in as ${selected.name}...`,
       "Initializing AI models...",
@@ -82,6 +125,7 @@ export function Welcome({ users = DEFAULT_USERS, onSignIn, className }: Props) {
       "Loading user settings...",
       "Ready",
     ];
+
     let i = 0;
     const tick = () => {
       setSigningLines((prev) => [...prev, lines[i]]);
@@ -90,27 +134,37 @@ export function Welcome({ users = DEFAULT_USERS, onSignIn, className }: Props) {
         window.clearInterval(signTimerRef.current ?? undefined);
         signTimerRef.current = null;
         setExiting(true);
-        setTimeout(() => onSignIn(selected), 500);
+        setTimeout(() => {
+          signIn({
+            id: selected.id,
+            name: selected.name,
+            avatarUrl: selected.avatarUrl,
+          });
+          useAppStore.getState().setActiveId(null);
+          hydrate();
+        }, 500);
       }
     };
+
     setBootBlocks(0);
     const blockId = window.setInterval(
       () => setBootBlocks((b) => Math.min(50, b + 1)),
       40,
     );
+
     tick();
     signTimerRef.current = window.setInterval(tick, 300);
+
     return () => {
       if (signTimerRef.current) window.clearInterval(signTimerRef.current);
       window.clearInterval(blockId);
     };
-  }, [step, selected, onSignIn]);
+  }, [step, selected, signIn, hydrate]);
 
   return (
     <div
       className={cn(
         "h-screen w-full bg-background flex items-center justify-center p-4",
-        className,
       )}
     >
       <div
@@ -126,22 +180,19 @@ export function Welcome({ users = DEFAULT_USERS, onSignIn, className }: Props) {
                 <Logo />
                 <span className="text-sm font-semibold">Nano Studio 98</span>
               </div>
-              <span className="text-[10px] uppercase">Select User</span>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] uppercase">Select User</span>
+              </div>
             </div>
             <div className="p-4">
               <div className="mb-3 text-sm text-muted-foreground">
                 Click your user to sign in.
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {users.map((u) => (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+                {(mounted && users?.length ? users : DEFAULT_USERS).map((u) => (
                   <button
                     key={u.id}
-                    onClick={() => {
-                      void playStartupSound();
-                      setSelected(u);
-                      setSigningLines([]);
-                      setStep("signing");
-                    }}
+                    onClick={() => handleUserSelect(u)}
                     className={cn(
                       "group flex items-center gap-3 border-2 border-foreground bg-input text-foreground shadow-sm px-3 py-2 text-left",
                       "hover:bg-muted",
@@ -160,6 +211,11 @@ export function Welcome({ users = DEFAULT_USERS, onSignIn, className }: Props) {
                     </div>
                   </button>
                 ))}
+              </div>
+              <div className="flex justify-end">
+                <Button onClick={() => setNewOpen(true)} className="px-6">
+                  New User
+                </Button>
               </div>
             </div>
           </div>
@@ -202,6 +258,48 @@ export function Welcome({ users = DEFAULT_USERS, onSignIn, className }: Props) {
           </div>
         )}
       </div>
+
+      <Dialog open={newOpen} onOpenChange={setNewOpen}>
+        <DialogContent className="sm:max-w-[400px]" title="Create User">
+          <DialogHeader>
+            <DialogTitle className="sr-only">Create User</DialogTitle>
+            <DialogDescription className="text-muted-foreground mb-4">
+              Create a local user to keep chats and settings separate.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div className="space-y-2">
+              <Label
+                htmlFor="user-name"
+                className="text-foreground font-medium"
+              >
+                Username
+              </Label>
+              <Input
+                id="user-name"
+                value={newName}
+                onChange={(e) => setNewName(e.target.value)}
+                placeholder="Enter a name"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") handleCreateUser();
+                }}
+                autoFocus
+              />
+            </div>
+          </div>
+          <DialogFooter className="mt-3 gap-2">
+            <Button variant="outline" onClick={() => setNewOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleCreateUser}
+              disabled={newName.trim().length < 2}
+            >
+              Create
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
