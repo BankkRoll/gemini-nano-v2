@@ -8,7 +8,7 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?logo=typescript)](https://www.typescriptlang.org/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4.0-38B2AC?logo=tailwind-css)](https://tailwindcss.com/)
 
-<img width="1669" height="945" alt="image" src="https://github.com/user-attachments/assets/2897d220-ab6d-486d-9066-9a1e823dc498" />
+<img alt="image" src="https://github.com/user-attachments/assets/fa89bb6b-5608-44a0-ad8a-a98fe1cb7486" />
 
 <details>
  <summary>View it in action video</summary>

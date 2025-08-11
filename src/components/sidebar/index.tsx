@@ -82,7 +82,7 @@ export function Sidebar({
 
   const SidebarContent = () => (
     <>
-      <div className="max-sm:hidden flex items-center justify-between px-3 py-2 bg-primary text-primary-foreground border-b-2 border-foreground">
+      <div className="max-lg:hidden flex items-center justify-between px-3 py-2 bg-primary text-primary-foreground border-b-2 border-foreground">
         <Link href="/" className="flex items-center gap-2">
           <Logo />
           <span className="text-sm text-primary-foreground font-semibold">

@@ -456,7 +456,7 @@ export default function Page() {
         <main className="flex-1 flex flex-col min-h-0">
           {!hasMessages ? (
             <div
-              className="flex-1 flex flex-col items-center justify-center px-6"
+              className="relative flex-1 flex flex-col items-center justify-center gap-10 lg:gap-20 px-6"
               style={{
                 backgroundImage: 'url("/background.jpg")',
                 backgroundSize: "cover",

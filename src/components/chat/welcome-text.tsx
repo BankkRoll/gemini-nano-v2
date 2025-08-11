@@ -34,7 +34,7 @@ export function WelcomeText({ tool, model: _model }: WelcomeTextProps) {
   const baseDelaySeconds = 0.06;
 
   return (
-    <div className="mb-8 text-center">
+    <div className="z-10 mb-8 text-center">
       <h1 className="text-3xl font-semibold tracking-tight">
         {words.map((word, index) => {
           const hasChanged = !previousWords || previousWords[index] !== word;
