@@ -19,9 +19,6 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-/**
- * Page orchestrates session, conversations, AI interactions, URL sync, and layout.
- */
 export default function Page() {
   const [sessionUser, setSessionUser] = useState<SessionUser | null>(null);
   const [hasCheckedUser, setHasCheckedUser] = useState(false);
@@ -401,7 +398,7 @@ export default function Page() {
   }
 
   return (
-    <div className="flex h-screen bg-background">
+    <div className="flex h-screen bg-background-image">
       <div className="hidden lg:block w-80 h-screen flex-shrink-0 bg-card">
         <Sidebar
           conversations={conversations}
@@ -458,7 +455,16 @@ export default function Page() {
 
         <main className="flex-1 flex flex-col min-h-0">
           {!hasMessages ? (
-            <div className="flex-1 flex flex-col items-center justify-center px-6">
+            <div
+              className="flex-1 flex flex-col items-center justify-center px-6"
+              style={{
+                backgroundImage: 'url("/background.jpg")',
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+                backgroundRepeat: "no-repeat",
+                backgroundAttachment: "fixed",
+              }}
+            >
               <WelcomeText
                 tool={active?.tool ?? pendingTool}
                 model={active?.model ?? pendingModel}
@@ -490,13 +496,13 @@ export default function Page() {
             </div>
           ) : (
             <>
-              <div className="flex-1 px-6 overflow-hidden">
-                <div className="h-full max-w-3xl mx-auto">
+              <div className="flex-1 px-2 md:px-6 overflow-hidden">
+                <div className="h-full max-w-6xl mx-auto">
                   <ChatFeed messages={active?.messages ?? []} busy={busy} />
                 </div>
               </div>
 
-              <div className="px-6 pb-6">
+              <div className="px-2 md:px-6 pb-2 md:pb-6">
                 <div className="max-w-3xl mx-auto">
                   <PromptDock
                     tool={active?.tool ?? pendingTool}

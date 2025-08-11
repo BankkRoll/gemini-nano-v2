@@ -2,8 +2,9 @@
 
 import { cn } from "@/lib/utils";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { createRoot } from "react-dom/client";
-import { parseBlocks } from "./blocks";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import { createMarkdownComponents } from "./components";
 
 interface MarkdownRendererProps {
   content: string;
@@ -42,38 +43,37 @@ export function MarkdownRenderer({
     return normalized.trim();
   }, []);
 
-  const parseMarkdown = useCallback(
-    (text: string) => parseBlocks(text, { copyToClipboard, copiedCode }),
+  const components = useMemo(
+    () => createMarkdownComponents({ copyToClipboard, copiedCode }),
     [copyToClipboard, copiedCode],
   );
 
-  const renderedContent = useMemo(() => {
-    const normalized = normalizeContent(content);
-    return parseMarkdown(normalized);
-  }, [content, normalizeContent, parseMarkdown]);
+  const normalizedContent = useMemo(
+    () => normalizeContent(content),
+    [content, normalizeContent],
+  );
 
   useEffect(() => {
     if (content !== prevContentRef.current) {
       prevContentRef.current = content;
 
       if (isStreaming && contentRef.current) {
-        contentRef.current.innerHTML = "";
-        const tempContainer = document.createElement("div");
-        const root = createRoot(tempContainer);
-        root.render(<>{renderedContent}</>);
-        while (tempContainer.firstChild) {
-          contentRef.current.appendChild(tempContainer.firstChild);
-        }
+        // react-markdown handles this efficiently, but we can add custom logic if needed
       }
     }
-  }, [content, renderedContent, isStreaming]);
+  }, [content, isStreaming]);
 
   return (
     <div
       ref={contentRef}
-      className={cn("markdown-content space-y-2", className)}
+      className={cn(
+        "markdown-content space-y-2 w-full mx-auto max-w-[80svw] lg:max-w-[60svw] 2xl:max-w-5xl overflow-hidden break-words",
+        className,
+      )}
     >
-      {!isStreaming && renderedContent}
+      <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
+        {normalizedContent}
+      </ReactMarkdown>
     </div>
   );
 }

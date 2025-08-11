@@ -14,7 +14,7 @@ export function CodeBlock({ children, className, ...props }: CodeBlockProps) {
   return (
     <div
       className={cn(
-        "not-prose flex w-full flex-col overflow-hidden border-2",
+        "not-prose flex w-full max-w-full flex-col border-2",
         "border-foreground bg-card text-card-foreground rounded-none shadow-sm",
         className,
       )}
@@ -62,7 +62,7 @@ export function CodeBlockCode({
   }, [code, language]);
 
   const classNames = cn(
-    "w-full overflow-x-auto text-[13px]",
+    "w-full max-w-full overflow-x-auto text-[13px]",
     "[&>pre]:px-4 [&>pre]:py-3 [&>pre]:m-0 [&>pre]:bg-transparent [&>pre]:border-0",
     "[&_.shiki]:bg-transparent [&_.shiki]:!bg-transparent [&_.shiki]:!bg-[transparent]",
     className,
@@ -92,7 +92,10 @@ export function CodeBlockGroup({
 }: CodeBlockGroupProps) {
   return (
     <div
-      className={cn("flex items-center justify-between", className)}
+      className={cn(
+        "flex items-center justify-between w-full max-w-full",
+        className,
+      )}
       {...props}
     >
       {children}
@@ -170,7 +173,7 @@ export function CollapsibleCodeBlock({
           </button>
         </div>
       </CodeBlockGroup>
-      <div className="relative">
+      <div className="relative w-full max-w-full">
         {isOpen ? (
           <CodeBlockCode code={code} language={language} />
         ) : (

@@ -79,7 +79,6 @@ function DialogContent({
         )}
         {...props}
       >
-        {/* Windows 98 Title Bar */}
         {title && (
           <div className="flex items-center justify-between px-3 py-2 bg-primary text-primary-foreground border-b-2 border-foreground">
             <h2 className="text-sm font-semibold">{title}</h2>
@@ -95,7 +94,6 @@ function DialogContent({
           </div>
         )}
 
-        {/* Content Area */}
         <div className="p-6">{children}</div>
       </DialogPrimitive.Content>
     </DialogPortal>

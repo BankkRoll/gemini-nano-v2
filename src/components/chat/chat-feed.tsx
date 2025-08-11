@@ -26,8 +26,8 @@ export function ChatFeed({
 
   return (
     <div className={cn("h-full min-h-0", className)}>
-      <ScrollArea className="h-full" ref={containerRef}>
-        <div className="px-0 py-4">
+      <ScrollArea className="h-full lg:px-4" ref={containerRef}>
+        <div className="px-0 py-4 w-full">
           <MessageList messages={messages} busy={busy} />
           <div className="h-4" />
         </div>
