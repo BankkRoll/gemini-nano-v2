@@ -370,7 +370,7 @@ export default function Page() {
               >
                 <Logo />
                 <span className="text-sm text-primary-foreground font-semibold">
-                  Nano Studio
+                  Nano Studio 98
                 </span>
               </Link>
               <span className="text-[10px] uppercase">Loading</span>
@@ -431,7 +431,7 @@ export default function Page() {
             >
               <Logo />
               <span className="text-sm text-primary-foreground font-semibold">
-                Nano Studio
+                Nano Studio 98
               </span>
             </Link>
           </div>

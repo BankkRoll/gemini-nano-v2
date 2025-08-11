@@ -1,4 +1,4 @@
-# Nano Studio
+# Nano Studio 98
 
 > Chrome Built‑in AI Chat (Gemini Nano) - Local, Private, Fast
 
@@ -33,7 +33,7 @@
 ```bash
 # Clone
 git clone https://github.com/BankkRoll/gemini-nano-v2.git
-cd chrome-nano-ai-app
+cd gemini-nano-v2
 
 # Install
 pnpm install

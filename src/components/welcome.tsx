@@ -124,7 +124,7 @@ export function Welcome({ users = DEFAULT_USERS, onSignIn, className }: Props) {
             <div className="flex items-center justify-between px-3 py-2 bg-primary text-primary-foreground border-b-2 border-foreground">
               <div className="flex items-center gap-2">
                 <Logo />
-                <span className="text-sm font-semibold">Nano Studio</span>
+                <span className="text-sm font-semibold">Nano Studio 98</span>
               </div>
               <span className="text-[10px] uppercase">Select User</span>
             </div>
@@ -170,7 +170,7 @@ export function Welcome({ users = DEFAULT_USERS, onSignIn, className }: Props) {
             <div className="flex items-center justify-between px-3 py-2 bg-primary text-primary-foreground border-b-2 border-foreground">
               <div className="flex items-center gap-2">
                 <Logo />
-                <span className="text-sm font-semibold">Nano Studio</span>
+                <span className="text-sm font-semibold">Nano Studio 98</span>
               </div>
               <span className="text-[10px] uppercase">Signing In</span>
             </div>

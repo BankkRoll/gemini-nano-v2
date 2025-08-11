@@ -86,7 +86,7 @@ export function Sidebar({
         <Link href="/" className="flex items-center gap-2">
           <Logo />
           <span className="text-sm text-primary-foreground font-semibold">
-            Nano Studio
+            Nano Studio 98
           </span>
         </Link>
         <StatusPill status={promptStatus} />
@@ -199,7 +199,7 @@ export function Sidebar({
           <SheetContent
             side="right"
             className="w-80 p-0 h-full"
-            title="Nano Studio"
+            title="Nano Studio 98"
           >
             <div className="h-full flex flex-col">
               <SidebarContent />
