@@ -3,32 +3,14 @@
 import { ThemeProvider } from "@/components/theme-provider";
 import { useAppStore } from "@/store/app-store";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 
-export default function AppProviders({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  const [aiInitialized, setAiInitialized] = useState(false);
-  const hydrate = useAppStore((s) => s.hydrate);
-  const refreshAI = useAppStore((s) => s.refreshAI);
-  const setDownloadOpen = useAppStore((s) => s.setDownloadOpen);
-  const activeId = useAppStore((s) => s.activeId);
-  const setActiveId = useAppStore((s) => s.setActiveId);
+function SearchParamsHandler() {
+  const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
-  const searchParams = useSearchParams();
-
-  useEffect(() => {
-    hydrate();
-    void refreshAI().finally(() => setAiInitialized(true));
-    const onVis = () => {
-      if (document.visibilityState === "visible") void refreshAI();
-    };
-    document.addEventListener("visibilitychange", onVis);
-    return () => document.removeEventListener("visibilitychange", onVis);
-  }, [hydrate]);
+  const activeId = useAppStore((s) => s.activeId);
+  const setActiveId = useAppStore((s) => s.setActiveId);
 
   useEffect(() => {
     const current = searchParams.get("chat");
@@ -55,6 +37,29 @@ export default function AppProviders({
     }
   }, [activeId, router, pathname]);
 
+  return null; // This component doesn't render anything
+}
+
+export default function AppProviders({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const [aiInitialized, setAiInitialized] = useState(false);
+  const hydrate = useAppStore((s) => s.hydrate);
+  const refreshAI = useAppStore((s) => s.refreshAI);
+  const setDownloadOpen = useAppStore((s) => s.setDownloadOpen);
+
+  useEffect(() => {
+    hydrate();
+    void refreshAI().finally(() => setAiInitialized(true));
+    const onVis = () => {
+      if (document.visibilityState === "visible") void refreshAI();
+    };
+    document.addEventListener("visibilitychange", onVis);
+    return () => document.removeEventListener("visibilitychange", onVis);
+  }, [hydrate]);
+
   useEffect(() => {
     if (!aiInitialized) return;
     const statuses = [
@@ -73,5 +78,12 @@ export default function AppProviders({
     else if (hasDownloadable || allUnavailable) setDownloadOpen(true);
   }, [aiInitialized, setDownloadOpen]);
 
-  return <ThemeProvider attribute="class">{children}</ThemeProvider>;
+  return (
+    <ThemeProvider attribute="class">
+      <Suspense fallback={null}>
+        <SearchParamsHandler />
+      </Suspense>
+      {children}
+    </ThemeProvider>
+  );
 }
