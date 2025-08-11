@@ -49,65 +49,27 @@ pnpm start
 ## Project structure
 
 ```
-src/
-├─ app/
-│  ├─ globals.css
-│  ├─ layout.tsx
-│  └─ page.tsx
-├─ components/
-│  ├─ chat/
-│  │  ├─ auto-scroll-area.tsx
-│  │  ├─ chat-feed.tsx
-│  │  ├─ message-item.tsx
-│  │  ├─ message-list.tsx
-│  │  ├─ status-badge.tsx
-│  │  ├─ thinking-animation.tsx
-│  │  └─ welcome-text.tsx
-│  ├─ markdown-renderer/
-│  │  ├─ code-block.tsx
-│  │  ├─ components.tsx
-│  │  └─ index.tsx
-│  ├─ prompt-dock/
-│  │  ├─ index.tsx
-│  │  ├─ model-select.tsx
-│  │  ├─ send-controls.tsx
-│  │  ├─ tool-select.tsx
-│  │  └─ translate-select.tsx
-│  ├─ settings-dialog/
-│  │  ├─ index.tsx
-│  │  ├─ language-select.tsx
-│  │  ├─ stream-control.tsx
-│  │  ├─ temperature-control.tsx
-│  │  └─ topk-control.tsx
-│  ├─ sidebar/
-│  │  ├─ conversation-item.tsx
-│  │  ├─ index.tsx
-│  │  ├─ model-info-dialog.tsx
-│  │  ├─ status-badge.tsx
-│  │  └─ status-rows.tsx
-│  ├─ signin/
-│  │  ├─ boot-loader.tsx
-│  │  ├─ welcome.tsx
-│  │  └─ windows-loading.tsx
-│  ├─ download-required-dialog.tsx
-│  ├─ logo.tsx
-│  ├─ theme-provider.tsx
-│  └─ ui/  # Shadcn/Radix-based primitives
-│     ├─ accordion.tsx … separator.tsx … sidebar.tsx … dialog.tsx … (and more)
-├─ hooks/
-│  ├─ use-auto-scroll.ts
-│  └─ use-mobile.ts
-├─ lib/
-│  ├─ config.ts
-│  ├─ session.ts
-│  ├─ storage.ts
-│  └─ utils.ts
-├─ providers/
-│  └─ app-providers.tsx
-├─ store/
-│  └─ app-store.ts
-└─ types/
-   └─ index.ts
+src/                                 - App source
+├─ app/                               - Next.js app router entrypoints
+│  ├─ globals.css                     - Tailwind v4 base/theme/styles
+│  ├─ layout.tsx                      - Root HTML/body/providers
+│  └─ page.tsx                        - Main application shell
+├─ components/                        - UI and feature components
+│  ├─ chat/                           - Chat UI and effects
+│  ├─ markdown-renderer/              - Markdown rendering pipeline
+│  ├─ prompt-dock/                    - Input dock (model/tool/translate/send)
+│  ├─ settings-dialog/                - Settings modal
+│  ├─ sidebar/                        - Conversations and model status
+│  ├─ signin/                         - Windows‑style sign‑in flow
+│  ├─ download-required-dialog.tsx    - Prompt to warm up/download models
+│  ├─ logo.tsx                        - App logo SVG
+│  ├─ theme-provider.tsx              - next-themes provider wrapper
+│  └─ ui/                             - Reusable primitives (shadcn/radix)
+├─ hooks/                             - Custom hooks
+├─ lib/                               - App utilities and storage
+├─ providers/                         - Global providers - Hydration, AI refresh, URL sync, dialog
+├─ store/                             - Zustand store - Conversations, pending tool/model, AI
+└─ types/                             - Shared types
 ```
 
 ## Development
@@ -138,15 +100,18 @@ pnpm format       # Format code
 
 ## Data Storage
 
-```typescript
-// localStorage (persistent, per user — keys are scoped to user id)
-"nano:{userId}:settings"       // App settings
-"nano:{userId}:conversations"  // Chat history
-"nano:{userId}:active"         // Active conversation id
+- Users roster: `localStorage["nano:users"]` (list of local Windows‑style users)
+- Signed‑in session: `sessionStorage["nano:session"]` (current user only)
+- Per‑user scoped keys (persisted in `localStorage`):
+  - `nano:{userId}:settings` — app settings (system prompt, temperature, …)
+  - `nano:{userId}:conversations` — conversation list + messages
+  - `nano:{userId}:active` — active conversation id
 
-// sessionStorage (temporary)
-nano: session; // User session
-```
+Notes
+
+- Keys are automatically scoped by `userId` via `lib/storage.ts`.
+- On sign‑in/out we clear the active conversation id to avoid stale selection.
+- Tool/Model changes are stored as pending until the first message creates a chat.
 
 ## Configuration
 
