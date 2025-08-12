@@ -102,6 +102,8 @@ type ConversationsSlice = {
 type ChatRuntimeSlice = {
   busy: boolean;
   thinking: boolean;
+  abortController: AbortController | null;
+  currentSession: any | null;
   send: (text: string) => Promise<void>;
   stop: () => void;
 };
@@ -116,6 +118,10 @@ type DownloadSlice = {
 type UISlice = {
   showSettings: boolean;
   setShowSettings: (v: boolean) => void;
+  projectManifest: any | null;
+  setProjectManifest: (manifest: any | null) => void;
+  showSandbox: boolean;
+  setShowSandbox: (v: boolean) => void;
 };
 
 type Hydration = {
@@ -208,12 +214,13 @@ export const useAppStore = create<AppState>((set, get) => ({
         "auto") as Conversation["model"],
       tool: (initial?.tool ??
         get().pendingTool ??
-        "chat") as Conversation["tool"],
+        "prompt") as Conversation["tool"],
       messages: [],
     };
 
     const updatedConversations = [newConversation, ...get().conversations];
     setConversations(updatedConversations);
+    setActiveConversationId(id);
     set({ conversations: updatedConversations, activeId: id });
     return newConversation;
   },
@@ -382,9 +389,14 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   busy: false,
   thinking: false,
+  abortController: null,
+  currentSession: null,
   send: async (text) => {
     const trimmed = text.trim();
     if (!trimmed || get().busy) return;
+
+    const controller = new AbortController();
+    set({ abortController: controller });
 
     let activeId = get().activeId;
     if (!activeId) {
@@ -404,6 +416,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       userId: get().sessionUser?.id,
       userName: get().sessionUser?.name,
       userAvatarUrl: get().sessionUser?.avatarUrl,
+      createdAt: Date.now(),
     };
     const assistant: ChatMessage = {
       id: crypto.randomUUID(),
@@ -427,21 +440,29 @@ export const useAppStore = create<AppState>((set, get) => ({
     try {
       const tool = active.tool;
 
-      if (tool === "chat") {
+      if (tool === "prompt") {
+        const extraSystem = "";
         const session = await get().createPromptSession({
-          system: get().settings.systemPrompt,
+          system: [get().settings.systemPrompt, extraSystem]
+            .filter(Boolean)
+            .join("\n\n"),
           temperature: get().settings.temperature,
           topK: get().settings.topK,
         });
+        set({ currentSession: session });
 
-        const streamIt = await get().promptStreaming(session, user.content);
+        const streamIt = await get().promptStreaming(
+          session,
+          user.content,
+          controller.signal,
+        );
 
         if (!get().settings.stream) {
           let out = "";
           for await (const chunk of streamIt) {
             out += typeof chunk === "string" ? chunk : String(chunk);
           }
-          updateAssistant({ content: out });
+          updateAssistant({ content: out, createdAt: Date.now() });
         } else {
           let accumulatedContent = "";
           for await (const chunk of streamIt) {
@@ -449,6 +470,7 @@ export const useAppStore = create<AppState>((set, get) => ({
             accumulatedContent += piece;
             updateAssistant({ content: accumulatedContent });
           }
+          updateAssistant({ createdAt: Date.now() });
         }
       } else if (tool === "summarize") {
         const s = await get().createSummarizer({
@@ -456,40 +478,113 @@ export const useAppStore = create<AppState>((set, get) => ({
           length: "long",
           format: "plain-text",
         });
-        const out = await s.summarize(user.content);
-        updateAssistant({ content: String(out ?? "") });
+        set({ currentSession: s });
+        let out: any;
+        try {
+          out = await s.summarize(user.content, { signal: controller.signal });
+        } catch (e: any) {
+          if (e?.name === "AbortError") return;
+          throw e;
+        }
+        updateAssistant({ content: String(out ?? ""), createdAt: Date.now() });
       } else if (tool === "translate") {
         const t = await get().createTranslator({
           sourceLanguage: "auto",
           targetLanguage: get().settings.targetLang,
         });
-        const out = await t.translate(user.content);
-        updateAssistant({ content: String(out ?? "") });
+        set({ currentSession: t });
+        let out: any;
+        try {
+          out = await t.translate(user.content, { signal: controller.signal });
+        } catch (e: any) {
+          if (e?.name === "AbortError") return;
+          throw e;
+        }
+        updateAssistant({ content: String(out ?? ""), createdAt: Date.now() });
       } else if (tool === "detect") {
         const d = await get().createDetector();
-        const det = await d.detect(user.content);
-        updateAssistant({ content: JSON.stringify(det, null, 2) });
+        set({ currentSession: d });
+        let det: any;
+        try {
+          det = await d.detect(user.content, { signal: controller.signal });
+        } catch (e: any) {
+          if (e?.name === "AbortError") return;
+          throw e;
+        }
+        updateAssistant({
+          content: JSON.stringify(det, null, 2),
+          createdAt: Date.now(),
+        });
       } else if (tool === "write") {
         const w = await get().createWriter({ task: "compose" });
-        const out = await w.write(user.content);
-        updateAssistant({ content: String(out ?? "") });
+        set({ currentSession: w });
+        let out: any;
+        try {
+          out = await w.write(user.content, { signal: controller.signal });
+        } catch (e: any) {
+          if (e?.name === "AbortError") return;
+          throw e;
+        }
+        updateAssistant({ content: String(out ?? ""), createdAt: Date.now() });
       } else if (tool === "rewrite") {
         const r = await get().createRewriter({ style: "neutral" });
-        const out = await r.rewrite(user.content);
-        updateAssistant({ content: String(out ?? "") });
+        set({ currentSession: r });
+        let out: any;
+        try {
+          out = await r.rewrite(user.content, { signal: controller.signal });
+        } catch (e: any) {
+          if (e?.name === "AbortError") return;
+          throw e;
+        }
+        updateAssistant({ content: String(out ?? ""), createdAt: Date.now() });
       } else if (tool === "proofread") {
         const p = await get().createProofreader({});
-        const out = await p.proofread(user.content);
-        updateAssistant({ content: String(out ?? "") });
+        set({ currentSession: p });
+        let out: any;
+        try {
+          out = await p.proofread(user.content, { signal: controller.signal });
+        } catch (e: any) {
+          if (e?.name === "AbortError") return;
+          throw e;
+        }
+        updateAssistant({ content: String(out ?? ""), createdAt: Date.now() });
       }
     } catch (error) {
       console.error("Error in send:", error);
     } finally {
-      set({ busy: false, thinking: false });
+      const sess = get().currentSession as any;
+      try {
+        if (sess && typeof sess.destroy === "function") {
+          sess.destroy();
+        }
+      } catch {}
+      set({
+        busy: false,
+        thinking: false,
+        currentSession: null,
+        abortController: null,
+      });
     }
   },
   stop: () => {
-    set({ busy: false, thinking: false });
+    try {
+      const ctrl = useAppStore.getState().abortController;
+      if (ctrl && !ctrl.signal.aborted) {
+        ctrl.abort();
+      }
+    } catch {}
+    try {
+      const sess = useAppStore.getState().currentSession as any;
+      if (sess && typeof sess.destroy === "function") {
+        sess.destroy();
+      }
+    } catch {}
+    set({
+      busy: false,
+      thinking: false,
+      currentSession: null,
+      abortController: null,
+    });
   },
 
   downloadOpen: false,
@@ -514,6 +609,10 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   showSettings: false,
   setShowSettings: (v) => set({ showSettings: v }),
+  projectManifest: null,
+  setProjectManifest: (manifest) => set({ projectManifest: manifest }),
+  showSandbox: false,
+  setShowSandbox: (v) => set({ showSandbox: v }),
 
   hydrate: () => {
     const { conversations, activeId } = readStoredChatState();

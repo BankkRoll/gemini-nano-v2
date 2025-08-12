@@ -1,5 +1,7 @@
 "use client";
 
+import SandBox from "@/components/markdown-renderer/sandbox";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Check, ChevronDown, Copy } from "lucide-react";
 import React, { useEffect, useMemo, useState } from "react";
@@ -46,11 +48,22 @@ export function CodeBlockCode({
     async function highlight() {
       try {
         const safeCode = typeof code === "string" ? code : String(code ?? "");
-        const html = await codeToHtml(safeCode, {
-          lang: language,
-          theme: "github-light",
-        });
-        if (active) setHighlightedHtml(html);
+        try {
+          const html = await codeToHtml(safeCode, {
+            lang: language,
+            theme: "github-light",
+          });
+          if (active) {
+            setHighlightedHtml(html);
+            return;
+          }
+        } catch {
+          const html = await codeToHtml(safeCode, {
+            lang: "plaintext",
+            theme: "github-light",
+          });
+          if (active) setHighlightedHtml(html);
+        }
       } catch {
         if (active) setHighlightedHtml(null);
       }
@@ -124,6 +137,7 @@ export function CollapsibleCodeBlock({
   ...props
 }: CollapsibleCodeBlockProps) {
   const [isOpen, setIsOpen] = useState<boolean>(initiallyOpen);
+  const [showSandbox, setShowSandbox] = useState<boolean>(false);
 
   const { previewCode, isTruncated } = useMemo(() => {
     const lines = (code ?? "").split("\n");
@@ -138,6 +152,12 @@ export function CollapsibleCodeBlock({
     if (onCopy) onCopy(code);
   };
 
+  const manifest = useMemo(
+    () => (language?.toLowerCase() === "json" ? extractManifest(code) : null),
+    [code, language],
+  );
+  const sandboxSupported = !!manifest;
+
   return (
     <CodeBlock className={className} {...props}>
       <CodeBlockGroup className="px-4 py-2 border-b border-border/30 bg-muted/50">
@@ -145,6 +165,18 @@ export function CollapsibleCodeBlock({
           {language || "code"}
         </div>
         <div className="flex items-center gap-1.5">
+          {sandboxSupported && (
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              className="h-7 px-2 border-2 border-foreground shadow-sm"
+              onClick={() => setShowSandbox((v) => !v)}
+              title={showSandbox ? "Hide Sandbox" : "Run in Sandbox"}
+            >
+              {showSandbox ? "Hide Sandbox" : "Run in Sandbox"}
+            </Button>
+          )}
           <button
             type="button"
             onClick={handleCopy}
@@ -157,20 +189,22 @@ export function CollapsibleCodeBlock({
               <Copy className="w-4 h-4 text-muted-foreground" />
             )}
           </button>
-          <button
-            type="button"
-            onClick={() => setIsOpen((v) => !v)}
-            className="p-1.5 rounded-md hover:bg-muted-foreground/10 transition-colors"
-            aria-label={isOpen ? "Collapse code" : "Expand code"}
-            aria-expanded={isOpen}
-          >
-            <ChevronDown
-              className={cn(
-                "w-4 h-4 text-muted-foreground transition-transform",
-                isOpen ? "rotate-180" : "rotate-0",
-              )}
-            />
-          </button>
+          {isTruncated && (
+            <button
+              type="button"
+              onClick={() => setIsOpen((v) => !v)}
+              className="p-1.5 rounded-md hover:bg-muted-foreground/10 transition-colors"
+              aria-label={isOpen ? "Collapse code" : "Expand code"}
+              aria-expanded={isOpen}
+            >
+              <ChevronDown
+                className={cn(
+                  "w-4 h-4 text-muted-foreground transition-transform",
+                  isOpen ? "rotate-180" : "rotate-0",
+                )}
+              />
+            </button>
+          )}
         </div>
       </CodeBlockGroup>
       <div className="relative w-full max-w-full">
@@ -185,6 +219,28 @@ export function CollapsibleCodeBlock({
           </div>
         )}
       </div>
+      {showSandbox && sandboxSupported && manifest && (
+        <div className="px-4 pb-4">
+          <SandBox manifest={manifest} className="mt-3" />
+        </div>
+      )}
     </CodeBlock>
   );
+}
+
+function extractManifest(text: string): any | null {
+  if (!text) return null;
+  const trimmed = text
+    .trim()
+    .replace(/^```(?:json)?\s*|```$/g, "")
+    .trim();
+  try {
+    const parsed = JSON.parse(trimmed);
+    const candidate = (parsed as any)?.manifest ?? parsed;
+    if (!candidate || typeof candidate !== "object") return null;
+    if (!candidate.template || !Array.isArray(candidate.files)) return null;
+    return candidate;
+  } catch {
+    return null;
+  }
 }

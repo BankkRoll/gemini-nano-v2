@@ -30,7 +30,7 @@ export function SettingsDialog() {
   const isGeminiModel =
     (current?.model ?? "auto") === "auto" ||
     (current?.model ?? "auto") === "text";
-  const isTranslateTool = (current?.tool ?? "chat") === "translate";
+  const isTranslateTool = (current?.tool ?? "prompt") === "translate";
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

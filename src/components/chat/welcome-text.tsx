@@ -12,10 +12,12 @@ export function WelcomeText() {
     (s: any) => (s as any).pendingTool,
   ) as Tool | null;
   const tool: Tool =
-    conversations.find((c) => c.id === activeId)?.tool ?? pendingTool ?? "chat";
+    conversations.find((c) => c.id === activeId)?.tool ??
+    pendingTool ??
+    "prompt";
   const words = useMemo<string[]>(() => {
     const map: Record<Tool, string[]> = {
-      chat: ["What", "can", "I", "help", "you", "build?"],
+      prompt: ["What", "can", "I", "help", "you", "build?"],
       summarize: ["What", "should", "I", "summarize?"],
       translate: ["What", "should", "I", "translate?"],
       detect: ["What", "language", "is", "this?"],
@@ -24,7 +26,7 @@ export function WelcomeText() {
       proofread: ["What", "should", "I", "proofread?"],
     } as const;
 
-    return map[tool] ?? map.chat;
+    return map[tool] ?? map.prompt;
   }, [tool]);
 
   const previousWordsRef = useRef<string[] | null>(null);

@@ -43,7 +43,7 @@ function isRole(value: unknown): value is ChatMessage["role"] {
 
 function isTool(value: unknown): value is Tool {
   return (
-    value === "chat" ||
+    value === "prompt" ||
     value === "summarize" ||
     value === "translate" ||
     value === "detect" ||

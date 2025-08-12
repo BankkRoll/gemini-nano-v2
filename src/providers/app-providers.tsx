@@ -1,6 +1,6 @@
 "use client";
 
-import { ThemeProvider } from "@/components/theme-provider";
+import { ThemeProvider } from "@/providers/theme-provider";
 import { useAppStore } from "@/store/app-store";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
@@ -37,7 +37,7 @@ function SearchParamsHandler() {
     }
   }, [activeId, router, pathname]);
 
-  return null; // This component doesn't render anything
+  return null;
 }
 
 export default function AppProviders({

@@ -20,21 +20,35 @@ function SendControlsBase({
   onQueueNext,
 }: Props) {
   return (
-    <div className="mt-2 flex items-center justify-between px-1 pb-1">
+    <div className="mt-2 flex items-center justify-between">
       <div />
       <div className="flex items-center gap-2">
         {!busy ? (
-          <Button onClick={onSend} className="border-2 border-card shadow-sm">
+          <Button
+            size="sm"
+            onClick={onSend}
+            className="border-2 border-black shadow-sm"
+          >
             <Send className="mr-2 h-4 w-4" /> Send
           </Button>
         ) : (
           <>
             {canQueue && (
-              <Button variant="secondary" onClick={onQueueNext}>
+              <Button
+                size="sm"
+                variant="secondary"
+                className="border-2 border-black shadow-sm"
+                onClick={onQueueNext}
+              >
                 <PlusCircle className="mr-2 h-4 w-4" /> Send next
               </Button>
             )}
-            <Button variant="outline" onClick={onStop}>
+            <Button
+              size="sm"
+              variant="outline"
+              className="border-2 border-black shadow-sm"
+              onClick={onStop}
+            >
               <Square className="mr-2 h-4 w-4" /> Stop
             </Button>
           </>

@@ -8,14 +8,7 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?logo=typescript)](https://www.typescriptlang.org/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4.0-38B2AC?logo=tailwind-css)](https://tailwindcss.com/)
 
-<img alt="image" src="https://github.com/user-attachments/assets/fa89bb6b-5608-44a0-ad8a-a98fe1cb7486" />
-
-<details>
- <summary>View it in action video</summary>
-  <div align="center">
-    <video src="https://github.com/user-attachments/assets/93f44d2e-4cf1-486c-9cc8-eb824bff7d77" alt="Nano Studio" width="120" height="120">
-  </div>
-</details>
+<img alt="image" src="https://github.com/user-attachments/assets/f746efab-5c72-40fd-b844-621917e577ba" />
 
 ---
 

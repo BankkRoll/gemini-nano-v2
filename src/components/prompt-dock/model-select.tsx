@@ -21,7 +21,7 @@ const OPTIONS: ModelOption[] = [
     id: "auto",
     label: "Gemini Nano · Auto",
     capabilities: [
-      "chat",
+      "prompt",
       "summarize",
       "translate",
       "detect",
@@ -34,7 +34,7 @@ const OPTIONS: ModelOption[] = [
     id: "text",
     label: "Gemini Nano · text",
     capabilities: [
-      "chat",
+      "prompt",
       "summarize",
       "translate",
       "detect",
@@ -43,7 +43,7 @@ const OPTIONS: ModelOption[] = [
       "proofread",
     ],
   },
-  { id: "generic", label: "Gemini Nano · generic", capabilities: ["chat"] },
+  { id: "generic", label: "Gemini Nano · generic", capabilities: ["prompt"] },
 ];
 
 function ModelSelectBase() {

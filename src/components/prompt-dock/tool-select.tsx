@@ -18,7 +18,7 @@ import { memo, useMemo } from "react";
 type ToolOption = { id: Tool; label: string };
 
 const OPTIONS: ToolOption[] = [
-  { id: "chat", label: "Chat" },
+  { id: "prompt", label: "Prompt" },
   { id: "summarize", label: "Summarizer" },
   { id: "translate", label: "Translator" },
   { id: "detect", label: "Language Detector" },
@@ -41,11 +41,11 @@ function ToolSelectBase() {
   const proofreaderStatus = useAppStore((s) => s.proofreaderStatus);
   const currentTool = useMemo(() => {
     const active = conversations.find((c) => c.id === activeId)?.tool;
-    return active ?? pendingTool ?? "chat";
+    return active ?? pendingTool ?? "prompt";
   }, [conversations, activeId, pendingTool]);
   const disabledByModel = (t: Tool) => {
     switch (t) {
-      case "chat":
+      case "prompt":
         return promptStatus !== "available";
       case "summarize":
         return summarizerStatus !== "available";

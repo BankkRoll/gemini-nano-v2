@@ -44,7 +44,7 @@ export function MarkdownRenderer({
   }, []);
 
   const components = useMemo(
-    () => createMarkdownComponents({ copyToClipboard, copiedCode }),
+    () => createMarkdownComponents({ copyToClipboard, copiedCode }) as any,
     [copyToClipboard, copiedCode],
   );
 

@@ -15,7 +15,7 @@ import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { useAppStore } from "@/store/app-store";
 import { useEffect, useRef, useState } from "react";
-import Logo from "../logo";
+import Logo from "../shared/logo";
 
 export type WindowsUser = {
   id: string;

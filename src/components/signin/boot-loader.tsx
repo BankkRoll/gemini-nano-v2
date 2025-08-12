@@ -3,7 +3,7 @@
 import { useAppStore } from "@/store/app-store";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Logo } from "../logo";
+import { Logo } from "../shared/logo";
 import { WindowsLoadingBar } from "./windows-loading";
 
 export function BootLoader() {

@@ -33,14 +33,27 @@ function MessageItemBase({ m }: { m: ChatMessage }) {
       >
         <div
           className={cn(
-            "mb-2 text-xs font-medium uppercase tracking-wider",
-            isAssistant ? "text-foreground" : "text-foreground text-right",
+            "mb-2 flex items-center gap-2 text-xs font-medium uppercase tracking-wider",
+            isAssistant ? "text-foreground" : "text-foreground",
+            isAssistant ? "justify-start" : "justify-end",
           )}
         >
-          {isAssistant ? "NANO" : m.userName || "User"}
+          <span>{isAssistant ? "NANO" : m.userName || "User"}</span>
+          {m.createdAt ? (
+            <span className="normal-case tracking-normal text-muted-foreground">
+              {new Date(m.createdAt).toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+              })}
+            </span>
+          ) : null}
         </div>
         <div className="prose prose-sm w-full break-words overflow-hidden">
-          <MarkdownRenderer content={m.content} />
+          {isAssistant ? (
+            <MarkdownRenderer content={m.content} />
+          ) : (
+            <div className="text-right">{m.content}</div>
+          )}
         </div>
       </div>
 

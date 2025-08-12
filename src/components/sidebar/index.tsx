@@ -12,13 +12,12 @@ import {
 } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useAppStore } from "@/store/app-store";
 import { Info, Menu, Plus } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
-import Logo from "../logo";
+import Logo from "../shared/logo";
 
 export function Sidebar(_props?: any) {
   const conversations = useAppStore((s) => s.conversations);
@@ -42,14 +41,14 @@ export function Sidebar(_props?: any) {
   );
   const [infoOpen, setInfoOpen] = useState(false);
   const [infoTool, setInfoTool] = useState<
-    | "chat"
+    | "prompt"
     | "summarize"
     | "translate"
     | "detect"
     | "write"
     | "rewrite"
     | "proofread"
-  >("chat");
+  >("prompt");
 
   const handleModelDownload = async (modelName: string) => {
     if (downloadingModels.has(modelName)) return;
@@ -111,7 +110,7 @@ export function Sidebar(_props?: any) {
       </ScrollArea>
 
       <div className="border-t-2 border-foreground p-3 bg-card">
-        <Accordion type="single" collapsible defaultValue="models">
+        <Accordion type="single" collapsible>
           <AccordionItem value="models" className="border-2 border-foreground">
             <AccordionTrigger className="px-3 py-2 text-xs font-medium">
               Model Status
@@ -119,7 +118,7 @@ export function Sidebar(_props?: any) {
             <AccordionContent className="px-3 pb-3 pt-1">
               <StatusRows
                 rows={[
-                  { label: "Chat", key: "chat", status: promptStatus },
+                  { label: "Prompt", key: "prompt", status: promptStatus },
                   {
                     label: "Summarize",
                     key: "summarize",
@@ -159,20 +158,6 @@ export function Sidebar(_props?: any) {
             </AccordionContent>
           </AccordionItem>
         </Accordion>
-
-        <div className="my-3">
-          <Separator className="bg-foreground" />
-        </div>
-
-        <Button
-          className="w-full border-2 border-foreground shadow-sm bg-input text-foreground hover:bg-muted"
-          onClick={() => {
-            useAppStore.getState().setActiveId(null);
-            signOut();
-          }}
-        >
-          Log out
-        </Button>
       </div>
     </>
   );
@@ -184,7 +169,7 @@ export function Sidebar(_props?: any) {
         onOpenChange={setInfoOpen}
         initialTool={infoTool}
         statuses={{
-          chat: promptStatus,
+          prompt: promptStatus,
           summarize: summarizerStatus,
           translate: translatorStatus,
           detect: detectorStatus,

@@ -2,10 +2,11 @@
 
 import { ChatFeed } from "@/components/chat/chat-feed";
 import { WelcomeText } from "@/components/chat/welcome-text";
-import { DownloadRequiredDialog } from "@/components/download-required-dialog";
-import Logo from "@/components/logo";
 import { PromptDock } from "@/components/prompt-dock";
 import { SettingsDialog } from "@/components/settings-dialog";
+import { DownloadRequiredDialog } from "@/components/shared/download-required-dialog";
+import Logo from "@/components/shared/logo";
+import Win98Footer from "@/components/shared/win98-footer";
 import { Sidebar } from "@/components/sidebar";
 import { BootLoader } from "@/components/signin/boot-loader";
 import { Welcome } from "@/components/signin/welcome";
@@ -31,8 +32,8 @@ export default function Page() {
       <BootLoader />
 
       {sessionUser && (
-        <div className="flex h-screen">
-          <div className="hidden lg:block w-80 h-screen flex-shrink-0 bg-card">
+        <div className="flex h-[calc(100svh-40px)]">
+          <div className="hidden lg:block w-80 flex-shrink-0 bg-card">
             <Sidebar />
           </div>
 
@@ -87,6 +88,7 @@ export default function Page() {
                   </div>
                 </>
               )}
+              <Win98Footer />
             </main>
           </div>
 

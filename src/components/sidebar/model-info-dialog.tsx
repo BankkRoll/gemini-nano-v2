@@ -23,7 +23,7 @@ import {
 import React, { useMemo, useState } from "react";
 
 type ToolKey =
-  | "chat"
+  | "prompt"
   | "summarize"
   | "translate"
   | "detect"
@@ -58,8 +58,8 @@ const TOOL_INFO: Record<
     intentUrl?: string;
   }
 > = {
-  chat: {
-    label: "Chat",
+  prompt: {
+    label: "Prompt",
     icon: Bot,
     description:
       "Conversational requests to Gemini Nano. Maintain lightweight sessions for local, private chat and assistants.",
@@ -248,7 +248,7 @@ function AvailabilityPill({ value }: { value: Availability }) {
 export function ModelInfoDialog({
   open,
   onOpenChange,
-  initialTool = "chat",
+  initialTool = "prompt",
   statuses,
 }: Props) {
   const [current, setCurrent] = useState<ToolKey>(initialTool);

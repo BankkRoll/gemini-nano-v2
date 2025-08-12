@@ -7,7 +7,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { CheckCircle, Circle } from "lucide-react";
-import { type Components } from "react-markdown";
+import ReactMarkdown, { type Components } from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { CollapsibleCodeBlock } from "./code-block";
 
 export interface MarkdownComponentsProps {
@@ -36,6 +37,24 @@ export function createMarkdownComponents({
 
       const language = className?.replace("language-", "") || "tsx";
       const code = String(children).replace(/\n$/, "");
+
+      // If the fenced block is markdown (md, mdx, mdc, markdown), render as markdown instead of a code block
+      const mdLangs = new Set(["md", "mdx", "mdc", "markdown"]);
+      if (mdLangs.has(language.toLowerCase())) {
+        return (
+          <div className="my-6">
+            <ReactMarkdown
+              remarkPlugins={[remarkGfm]}
+              components={createMarkdownComponents({
+                copyToClipboard,
+                copiedCode,
+              })}
+            >
+              {code}
+            </ReactMarkdown>
+          </div>
+        );
+      }
 
       return (
         <CollapsibleCodeBlock

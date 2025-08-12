@@ -8,8 +8,7 @@ import { StatusDot } from "@/components/sidebar/status-badge";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useAppStore } from "@/store/app-store";
-import type { Availability, Tool } from "@/types";
-import { ArrowUp, GripVertical, Pencil, Settings, Trash2 } from "lucide-react";
+import { ArrowUp, GripVertical, Pencil, Trash2 } from "lucide-react";
 import { motion } from "motion/react";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 
@@ -31,6 +30,12 @@ export const PromptDock = React.memo(function PromptDock({
   const activeId = useAppStore((s) => s.activeId);
   const settings = useAppStore((s) => s.settings);
   const updateSettings = useAppStore((s) => s.updateSettings);
+  const setProjectManifest = useAppStore(
+    (s: any) => (s as any).setProjectManifest as (m: any | null) => void,
+  );
+  const setShowSandbox = useAppStore(
+    (s: any) => (s as any).setShowSandbox as (v: boolean) => void,
+  );
   const busy = useAppStore((s) => s.busy);
   const thinking = useAppStore((s) => s.busy);
   const send = useAppStore((s) => s.send);
@@ -50,46 +55,18 @@ export const PromptDock = React.memo(function PromptDock({
   const handleSend = () => {
     const text = (inputValue ?? "").trim();
     if (!text) return;
+    const payload = text;
     if (busy) {
-      setQueuedItems((prev) => [...prev, { id: crypto.randomUUID(), text }]);
+      setQueuedItems((prev) => [
+        ...prev,
+        { id: crypto.randomUUID(), text: payload },
+      ]);
       updateValue("");
       return;
     }
-    send(text);
+    send(payload);
     setInternalValue("");
   };
-  const currentModel = current?.model ?? "auto";
-  const allowedTools = [
-    "chat",
-    "summarize",
-    "translate",
-    "detect",
-    "write",
-    "rewrite",
-    "proofread",
-  ] as const;
-  const statusForTool = (t: Tool): Availability => {
-    switch (t) {
-      case "chat":
-        return promptStatus;
-      case "summarize":
-        return summarizerStatus;
-      case "translate":
-        return translatorStatus;
-      case "detect":
-        return detectorStatus;
-      case "write":
-        return writerStatus;
-      case "rewrite":
-        return rewriterStatus;
-      case "proofread":
-        return proofreaderStatus;
-      default:
-        return "unavailable";
-    }
-  };
-  const disabledByModel = (t: Tool) =>
-    !allowedTools.includes(t) || statusForTool(t) !== "available";
 
   useEffect(() => {
     const wasBusy = prevBusyRef.current;
@@ -193,63 +170,38 @@ export const PromptDock = React.memo(function PromptDock({
   };
 
   const Panel = (
-    <div className="dock-measure relative pointer-events-auto border-2 border-black bg-card shadow-lg">
-      <div className="flex items-center justify-between gap-2 px-4 pt-3 text-xs text-foreground">
+    <div className="dock-measure px-2 py-2 relative pointer-events-auto border-2 border-black bg-card shadow-lg">
+      <div className="flex items-center justify-between pb-4 gap-2 text-xs text-foreground">
         <div className="flex items-center gap-2">
           <StatusDot status={promptStatus} />
           <span className="hidden sm:inline">Built‑in AI</span>
-          <span className="uppercase">{current?.tool ?? "chat"}</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button
-            className="border-2 border-foreground shadow-sm bg-input text-foreground hover:bg-muted"
-            size="sm"
-            onClick={() => useAppStore.getState().setShowSettings(true)}
-          >
-            <Settings className="mr-2 h-3.5 w-3.5" /> Settings
-          </Button>
+          <span className="uppercase">{current?.tool ?? "prompt"}</span>
         </div>
       </div>
 
-      <div className="relative px-4 pb-4 pt-2">
-        <div className="pointer-events-none absolute bottom-6 left-6 flex flex-wrap items-center gap-2">
-          <div className="pointer-events-auto">
-            <ModelSelect />
-          </div>
-
-          <div className="pointer-events-auto">
-            <ToolSelect />
-          </div>
-
-          {(current?.tool ?? "chat") === "translate" && (
-            <div className="pointer-events-auto">
-              <TranslateSelect />
-            </div>
-          )}
-        </div>
-
+      <div className="relative space-y-2">
         <Textarea
           ref={textareaRef}
           value={inputValue}
           onChange={(e) => updateValue(e.target.value)}
           placeholder={
-            (current?.tool ?? "chat") === "chat"
+            (current?.tool ?? "prompt") === "prompt"
               ? "Ask Nano to help…"
-              : (current?.tool ?? "chat") === "summarize"
+              : (current?.tool ?? "prompt") === "summarize"
                 ? "Paste text to summarize…"
-                : (current?.tool ?? "chat") === "translate"
+                : (current?.tool ?? "prompt") === "translate"
                   ? "Text to translate…"
-                  : (current?.tool ?? "chat") === "detect"
+                  : (current?.tool ?? "prompt") === "detect"
                     ? "Text to detect language…"
-                    : (current?.tool ?? "chat") === "write"
+                    : (current?.tool ?? "prompt") === "write"
                       ? "Describe what to write…"
-                      : (current?.tool ?? "chat") === "rewrite"
+                      : (current?.tool ?? "prompt") === "rewrite"
                         ? "Paste text to rewrite…"
                         : "Paste text to proofread…"
           }
           rows={4}
           maxLength={1000}
-          className="resize-none max-h-40 overflow-y-auto text-foreground placeholder:text-foreground/60"
+          className="border-black max-h-56 overflow-y-auto text-foreground placeholder:text-foreground/60"
           onKeyDown={(e) => {
             if (e.key === "Enter" && !e.shiftKey) {
               e.preventDefault();
@@ -258,13 +210,30 @@ export const PromptDock = React.memo(function PromptDock({
           }}
         />
 
-        <SendControls
-          busy={busy}
-          onSend={handleSend}
-          onStop={() => stop()}
-          canQueue={busy && Boolean((inputValue ?? "").trim())}
-          onQueueNext={handleQueueNext}
-        />
+        <div className="flex items-center justify-between">
+          <div className="pointer-events-none flex flex-wrap items-center gap-2">
+            <div className="pointer-events-auto">
+              <ModelSelect />
+            </div>
+
+            <div className="pointer-events-auto">
+              <ToolSelect />
+            </div>
+
+            {(current?.tool ?? "prompt") === "translate" && (
+              <div className="pointer-events-auto">
+                <TranslateSelect />
+              </div>
+            )}
+          </div>
+          <SendControls
+            busy={busy}
+            onSend={handleSend}
+            onStop={() => stop()}
+            canQueue={busy && Boolean((inputValue ?? "").trim())}
+            onQueueNext={handleQueueNext}
+          />
+        </div>
       </div>
     </div>
   );
@@ -279,7 +248,7 @@ export const PromptDock = React.memo(function PromptDock({
       >
         {queuedItems.length > 0 && (
           <div className="mb-2 border-2 border-black bg-card px-2 py-2 text-xs shadow-sm">
-            <div className="flex items-center justify-between px-1 pb-1">
+            <div className="flex items-center justify-between">
               <span className="text-foreground">
                 Queue ({queuedItems.length})
               </span>
@@ -347,7 +316,7 @@ export const PromptDock = React.memo(function PromptDock({
     >
       {queuedItems.length > 0 && (
         <div className="border-2 border-black border-b-0 bg-card px-2 py-2 text-xs shadow-sm">
-          <div className="flex items-center justify-between px-1 pb-1">
+          <div className="flex items-center justify-between">
             <span className="text-foreground">
               Queue ({queuedItems.length})
             </span>

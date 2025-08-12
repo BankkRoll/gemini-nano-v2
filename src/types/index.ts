@@ -13,10 +13,11 @@ export type ChatMessage = {
   userId?: string;
   userName?: string;
   userAvatarUrl?: string;
+  createdAt?: number;
 };
 
 export type Tool =
-  | "chat"
+  | "prompt"
   | "summarize"
   | "translate"
   | "detect"
